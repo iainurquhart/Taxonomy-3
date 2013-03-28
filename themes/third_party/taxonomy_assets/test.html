@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="iso-8859-1"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<title>Folder Tree List</title>
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
+<style>
+
+
+
+
+
+/* three */
+ul.explorer4{
+	padding: 5px;
+	background-color: White;
+	margin: 0;
+	
+}
+ul.explorer4 ul{
+	padding: 0;
+	margin: 0 0 0 10px;
+	
+}
+
+ul.explorer4 li{
+	list-style: none;
+	
+	background-image: url("gfx/dotted.gif");
+
+	background-repeat: repeat-y;
+	padding: 2px 0 2px 20px;
+	text-indent: -19px;
+	background-position: 9px 0;
+	
+}
+
+
+
+
+ul.explorer4 li:last-child{
+	list-style: none;
+	background-image: url("gfx/dotted.gif");
+	background-repeat: no-repeat;
+	padding-left: 20px;
+	text-indent: -19px;
+	background-position: 9px 0;
+}
+ul.explorer4 li a{
+	font-family: Arial;
+	text-decoration: none;
+	color: black;
+}
+ul.explorer4 li a:hover{
+	color: blue;
+	text-decoration: none;
+}
+
+ul.explorer4 li a::before{
+	content: url("gfx/folder.gif") " ";
+}
+ul.explorer4 li a:hover::before{
+	content: url("gfx/folderhover.gif") " ";
+}
+
+ul.explorer4 li a:last-child::before{
+	content: url("gfx/page.gif") " ";
+}
+ul.explorer4 li a:last-child:hover::before{
+	content: url("gfx/pagehover.gif") " ";
+}
+
+
+</style>
+
+<link rel="stylesheet" href="/css/css-play-template.css" media="screen" />
+
+
+</head>
+
+<body>
+
+<ul class="explorer4">
+	<li><a href="sd">liasdnfasdf</a>
+		<ul><li><a href="sd">liasdnfasdf</a></li>
+			<li><a href="sd">liasdnfasdf</a></li>
+			<li><a href="sd">liasdnfasdf</a>
+				<ul><li><a href="sd">liasdnfasdf</a></li>
+				<li><a href="sd">liasdnfasdf</a></li></ul>
+			
+			</li></ul>
+	</li>
+	<li><a href="sd">liasdnfasdf</a>
+		<ul><li><a href="asdfasdf">asdf hgasdfgasd</a></li></ul></li>
+	
+
+</ul>
+
+</body>
+</html>
