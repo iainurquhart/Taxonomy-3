@@ -130,10 +130,10 @@ class Taxonomy extends Taxonomy_base {
 			'use_custom_url' => $this->get_param('use_custom_url', 'no'),
 			'li_has_children_class' => $this->get_param('li_has_children_class', 'has_children'),
 			'parents' => array(),
-			'list_type' => $this->get_param('list_type', 'ul')
+			'list_type' => $this->get_param('list_type', 'ul'),
+			'field_keys' => array()
 		);
 		// --------------------------------------------------
-
 
 		// per-level parameters / Cheers Rob Sanchez (@_rsan)
 		// --------------------------------------------------
@@ -157,6 +157,21 @@ class Taxonomy extends Taxonomy_base {
 		// load what we need
 		$tree = $this->EE->taxonomy->get_tree();
 		$this->EE->taxonomy->get_nodes(); // loads the session array with node data
+
+		// setup default values for our taxonomy custom fields
+		// --------------------------------------------------
+		if($tree['fields'] != '')
+		{
+			$tree['fields'] = json_decode($tree['fields'], TRUE);
+			foreach($tree['fields'] as $field)
+			{
+				$params['field_keys'][$field['name']] = '';
+				$params['field_keys'][$field['name'].'_type'] = $field['type'];
+				$params['field_keys'][$field['name'].'_label'] = $field['label'];
+			}
+		}
+
+		// --------------------------------------------------
 
 		// Assertain current node
 		// --------------------------------------------------
@@ -385,6 +400,20 @@ class Taxonomy extends Taxonomy_base {
 					'node_indent' => str_repeat('', $level_count),
 					'children' => ''
 				);
+				
+				// add our default field values
+				$vars += $params['field_keys'];
+
+				// if values exist, swap 'em out
+				if($att['field_data'] != '' && !is_array($att['field_data']))
+				{
+					$att['field_data'] = json_decode($att['field_data'], TRUE);
+					foreach($att['field_data'] as $key => $field)
+					{
+						$vars[$key] = $field;
+					}
+				}
+
     		}
 
     		if((isset($node['children'])))

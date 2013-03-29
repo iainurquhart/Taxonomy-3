@@ -141,6 +141,7 @@
 				overflow: hidden;
 				margin-bottom: 10px;
 				padding: 10px;
+				background: #bcc0c3;
 				background: rgba(0,0,0,0.2);
 
 				border: 1px solid rgba(0,0,0,0.06);
@@ -194,6 +195,7 @@
 			background: #fff url(../gfx/item.png) repeat-x 0 100%;
 			
 			font-size: 14px;
+			border: 1px solid #e4e4e4;
 			border: 1px solid rgba(0,0,0,0.16);
 			border-bottom: none;
 			-webkit-border-top-left-radius: 5px;
@@ -228,6 +230,7 @@
 				
 			background: #fff url(../gfx/item.png) repeat-x 0 100%;
 			font-size: 14px;
+			border: 1px solid #e4e4e4;
 			border: 1px solid rgba(0,0,0,0.16);
 			border-bottom: none;
 			}
@@ -349,7 +352,7 @@
 			position: relative;
 			text-shadow: 0 1px 0 white;
 			background: #fff url(../gfx/item.png) repeat-x 0 100%;
-			border: 1px solid #a7a7a7;
+			border: 1px solid #e4e4e4;
 			border: 1px solid rgba(0,0,0,0.16);
 			font-size: 14px;
 			line-height: 40px;
@@ -898,4 +901,53 @@ array('data' => $tree['delete_tree_link'], 'class' => 'taxonomy-tree-delete')
 	background: #fff;
 	margin-bottom: 10px; border: 1px solid rgba(0,0,0,0.15);
 }
+.taxonomy-custom-fields {
+	padding: 20px 10px 0 10px;
+	overflow: hidden;
+	input[type="text"],
+	textarea,
+	input[type="text"]:focus,
+	textarea:focus {
+		border: 1px solid rgba(0,0,0,0.25) !important;
+		border-radius:			1px !important;
+		-moz-border-radius:		1px !important;
+	  	-webkit-border-radius:	1px !important;
+		padding: 7px !important;
+		font-size: 12px;
+	}
 
+
+	label {
+		font-size: 12px !important;
+		color: 90#37444d;
+	}
+	textarea {
+		height: 100px;
+		
+		line-height: 15px;
+	}
+	li {
+		padding-bottom: 13px;
+		clear: left;
+	}
+	li.node-field-checkbox {
+		padding: 5px 10px 3px 0;
+		position: relative;
+		min-width: 30%;
+		float: left;
+		border-radius: 5px;
+		line-height: 20px;
+		margin-bottom: 13px;
+		border: 1px solid rgba(0,0,0,0.25) !important;
+		background: rgba(0,0,0,0.05);
+
+		label {
+			margin-left: 30px;
+			text-shadow: 0 1px 0 rgba(255,255,255,0.3) !important;
+		}
+		input {
+			position: absolute; left: 10px; top: 7px;
+			
+		}
+	}
+}

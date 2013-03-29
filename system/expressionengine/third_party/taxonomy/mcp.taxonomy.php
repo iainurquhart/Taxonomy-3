@@ -300,6 +300,13 @@ class Taxonomy_mcp extends Taxonomy_base {
 		$vars['nodes'] = $this->EE->taxonomy->get_flat_tree();
 		$vars['this_node'] = $this->EE->taxonomy->get_node_by_id( $vars['node_id'] );
 
+		if(isset($vars['this_node']['field_data']) 
+			&& $vars['this_node']['field_data'] != ''
+				&& !is_array($vars['this_node']['field_data']))
+		{
+			$vars['this_node']['field_data'] = json_decode($vars['this_node']['field_data'], TRUE);
+		}
+
 		// do we have templates associated with this tree
 		// fetch options for selects
 		if($vars['tree']['templates'] != '')
@@ -348,6 +355,11 @@ class Taxonomy_mcp extends Taxonomy_base {
 
 		$vars['already_selected_entries'] = $this->cache['trees'][$this->EE->input->get('tree_id')]['nodes']['by_entry_id'];
 
+		if($vars['tree']['fields'] != '' && !is_array($vars['tree']['fields']))
+		{
+			$vars['tree']['fields'] = json_decode($vars['tree']['fields'], TRUE);
+		}
+
 		return $this->_content_wrapper('manage_node', $lang_key, $vars);
 	}
 
@@ -373,6 +385,11 @@ class Taxonomy_mcp extends Taxonomy_base {
 		$tree = $this->EE->taxonomy->get_tree();
 
 		// @todo validate tree
+
+		if( isset($node['field_data']) && is_array($node['field_data']))
+		{
+			$node['field_data'] = json_encode($node['field_data']);
+		}
 
 		// do we have a parent? get parent info
 		if( isset($node['parent_lft']))
