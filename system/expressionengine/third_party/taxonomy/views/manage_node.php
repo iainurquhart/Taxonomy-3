@@ -42,7 +42,7 @@ $(document).ready(function () {
 	<div id="taxonomy-node-label-holder">
 			<div class="taxonomy-inset">
 				<label for="node-label">Label / Title:</label>
-				<input name="node[label]" value="<?=$this_node['label']?>" type="text" id="node-label" />
+				<input name="node[label]" value="<?=form_prep($this_node['label'])?>" type="text" id="node-label" />
 			</div>
 	</div>
 
@@ -110,12 +110,12 @@ $(document).ready(function () {
 			<?php if(is_array($tree['fields'])): ?>
 				<li>
 					<div class="taxonomy-inset">
-						<label>Additional Attributes:</label>
+						<label>Additional Fields / Attributes:</label>
 						<div class="taxonomy-custom-fields">
 							<ul>
 						<?php foreach($tree['fields'] as $field):?>
 							<li class="node-field-<?=$field['type']?>">
-							<label for="cf-<?=$field['name']?>"><?=$field['label']?>:</label>
+							<label for="cf-<?=$field['name']?>"><?=$field['label']?></label>
 							<?php
 
 								$value = (isset($this_node['field_data'][ $field['name'] ]))
