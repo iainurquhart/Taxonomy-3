@@ -210,6 +210,7 @@ class Taxonomy_ft extends EE_Fieldtype {
 	
 		$data = $this->cache['data'][$this->settings['field_id']];
 		$data['entry_id'] = $this->settings['entry_id'];
+		$data['type'][] = 'entry';
 
 		if(!$data['label']) return '';
 
@@ -222,6 +223,16 @@ class Taxonomy_ft extends EE_Fieldtype {
 		unset($data['parent_lft']); // not needed for insert
 
 		$data['parent'] = $parent['node_id'];
+
+		if(isset($data['template_path']) && $data['template_path'] != '')
+		{
+			$data['type'][] = 'template';
+		}
+
+		if(isset($data['custom_url']) && $data['custom_url'] != '')
+		{
+			$data['type'][] = 'custom';
+		}
 
 		// updating a node?
 		if( isset($data['node_id']) && $data['node_id'] != '' )
