@@ -2,6 +2,7 @@
 	
 	echo form_hidden($settings['field_name'].'[tree_id]', $tree['id']);
 	echo form_hidden($settings['field_name'].'[node_id]', $data['node_id']);
+	echo form_hidden($settings['field_name'].'[custom_url]', $data['custom_url']);
 
 	$this->table->set_template($cp_table_template);
 	$this->table->set_heading(
@@ -30,13 +31,11 @@
 		);
 	}
 
-	
-
 	if($hide_template)
 	{
 		echo form_hidden($settings['field_name'].'[template_path]', $data['template_path']);
 	}
-	elseif(count($templates) && $hide_template === FALSE)
+	elseif(count($templates) && $hide_template === FALSE && $data['custom_url'] == '')
 	{
 		$this->table->add_row(
 			lang('select_template'),
@@ -47,7 +46,7 @@
 	echo $this->table->generate();
 
 ?>
-
+<?php // echo "<pre>"; print_r($data); echo "</pre>"; ?>
 <?php // echo "<pre>"; print_r($templates); echo "</pre>"; ?>
 <?php // echo "<pre>"; print_r($tree); echo "</pre>"; ?>
 <?php // echo "<pre>"; print_r($settings); echo "</pre>"; ?>

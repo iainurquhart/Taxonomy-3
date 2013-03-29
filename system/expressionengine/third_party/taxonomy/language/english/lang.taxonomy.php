@@ -63,7 +63,14 @@ $lang = array(
 	'tx_default_template' => "Default Template",
 	'tx_when_publishing_to' => "When publishing to: ",
 	'tx_field_not_configured' => "This Taxonomy field is not configured for publishing to this Channel",
-	'tx_tree_requires_a_root' => "The configured $taxonomy_tree_label requires a root $taxonomy_node_label before entries can be associated"
+	'tx_tree_requires_a_root' => "The configured $taxonomy_tree_label requires a root $taxonomy_node_label before entries can be associated",
+	'tx_advanced_settings' => "Advanced Settings: $taxonomy_tree_label Custom Fields",
+	'tx_advanced_settings_instructions' => "Custom fields are optional, and will appear to publishers when editing $taxonomy_nodes_label via the module interface.<br />By selecting 'Display on publish?' the field will appear on the Taxonomy Fieldtype too.",
+	'tx_custom_field_label'			=> 'Field label <br /><small>(Visible to publishers)</small>',
+	'tx_custom_field_short'			=> 'Field short name <br /><small>(Single word, no spaces. Underscores and dashes allowed)</small>',
+	'tx_type'							=> 'Type',
+	"tx_display_on_publish"			=> 'Display on publish?',
+	"tx_field_notice"					=> 'Please note: Changing a \'Field short name \' will not update already existing values if they have been entered.',
 );
 
 /* End of file lang.taxonomy.php */

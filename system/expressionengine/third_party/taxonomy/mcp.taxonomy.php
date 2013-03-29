@@ -96,6 +96,10 @@ class Taxonomy_mcp extends Taxonomy_base {
 		{
 			// get our settings
 			$vars['tree'] = $this->EE->taxonomy->get_tree();
+			if($vars['tree']['fields'] != '')
+			{
+				$vars['tree']['fields'] = json_decode($vars['tree']['fields'], TRUE);
+			}
 			// no settings - no tree, bounce the user
 			if( ! $vars['tree'] ) $this->_notify_redirect( 'tx_invalid_tree' );
 		}
@@ -119,6 +123,26 @@ class Taxonomy_mcp extends Taxonomy_base {
 			');
 		}
 
+		$this->EE->cp->add_js_script(
+			array(
+				'ui' => array(
+					'core', 'widget', 'mouse', 'sortable'
+				)
+			)
+		); 
+
+		$this->EE->cp->load_package_js('jquery.roland'); 
+		$this->EE->javascript->compile();
+
+		// misc assets/classes required
+		$vars['drag_handle'] = '&nbsp;';
+		$vars['nav'] = '<a class="remove_row" href="#">-</a> <a class="add_row" href="#">+</a>';
+		$vars['roland_template'] = array(
+				'table_open'		=> '<table class="mainTable roland_table" border="0" cellspacing="0" cellpadding="0">',
+				'row_start'			=> '<tr class="row">',
+				'row_alt_start'     => '<tr class="row">'
+		);
+		
 		// load up our various tree options (channels, templates, etc)
 		$vars['tree_options'] = $this->EE->taxonomy->get_tree_options();
 
@@ -148,6 +172,25 @@ class Taxonomy_mcp extends Taxonomy_base {
 		$data['channels'] 		= (isset($data['channels'])) ? implode('|', $data['channels']) : '';
 		$data['member_groups'] 	= (isset($data['member_groups'])) ? implode('|', $data['member_groups']) : '';
 		$data['site_id'] = $this->site_id;
+		$data['fields'] = '';
+
+		$fields = $this->EE->input->post('fields');
+		
+		if(is_array($fields))
+		{
+			foreach($fields as $key => $field)
+			{
+				if($field['label'] == '' && $field['name'] == '')
+				{
+					unset($fields[$key]);
+				}
+			}
+			if(count($data['fields']))
+			{
+				$data['fields'] = json_encode($fields);
+			}
+			
+		}
 
 		$tree_id = $this->EE->taxonomy->update_tree( $data );
 
