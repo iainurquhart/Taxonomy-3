@@ -71,6 +71,7 @@ $lang = array(
 	'tx_type'							=> 'Type',
 	"tx_display_on_publish"			=> 'Display on publish?',
 	"tx_field_notice"					=> 'Please note: Changing a \'Field short name \' will not update already existing values if they have been entered.',
+	'tx_node_label' => "Label / Title"
 );
 
 /* End of file lang.taxonomy.php */

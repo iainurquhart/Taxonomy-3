@@ -107,7 +107,7 @@ $(document).ready(function () {
 					<input name="node[custom_url]" type="text" id="node-url" value="<?php echo $this_node['custom_url'] ?>" />
 				</div>
 			</li>
-			<?php if(is_array($tree['fields'])): ?>
+			<?php if(is_array($tree['fields']) && count($tree['fields'])): ?>
 				<li>
 					<div class="taxonomy-inset">
 						<label>Additional Fields / Attributes:</label>

@@ -133,9 +133,9 @@ class Taxonomy_model extends Taxonomy_base
     	{
     		$data = $this->EE->db->get_where('taxonomy_trees', array('id' => $this->tree_id), 1 )->row_array();
 
-			$data['templates'] = explode('|', $data['templates']);
-			$data['channels'] = explode('|', $data['channels']);
-			$data['member_groups'] = explode('|', $data['member_groups']);
+			$data['templates'] = ($data['templates']) ? explode('|', $data['templates']) : array();
+			$data['channels'] = ($data['channels']) ? explode('|', $data['channels']) : array();
+			$data['member_groups'] = ($data['member_groups']) ? explode('|', $data['member_groups']) : array();
 			
     		$this->cache['trees'][$this->tree_id] = $data;
 

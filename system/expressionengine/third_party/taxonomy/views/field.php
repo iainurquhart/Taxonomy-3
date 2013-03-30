@@ -6,12 +6,12 @@
 
 	$this->table->set_template($cp_table_template);
 	$this->table->set_heading(
-			array('data' => lang('option'), 'class' => 'taxonomy-breadcrumbs'),
-			array('data' => lang('value'), 'class' => 'taxonomy-breadcrumbs')
+			array('data' => lang('tx_option'), 'class' => 'taxonomy-breadcrumbs'),
+			array('data' => lang('tx_value'), 'class' => 'taxonomy-breadcrumbs')
 		);
 
 	$this->table->add_row(
-		lang('node_label'),
+		lang('tx_node_label'),
 		form_input($settings['field_name'].'[label]', $data['label'])
 	);
 

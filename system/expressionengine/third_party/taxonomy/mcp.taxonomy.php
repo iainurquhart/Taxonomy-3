@@ -146,6 +146,8 @@ class Taxonomy_mcp extends Taxonomy_base {
 		// load up our various tree options (channels, templates, etc)
 		$vars['tree_options'] = $this->EE->taxonomy->get_tree_options();
 
+		$vars['tree_options']['templates']['by_group'] = (isset($vars['tree_options']['templates']['by_group'])) ? $vars['tree_options']['templates']['by_group'] : array();
+
 		// adding a new tree
 		if($this->EE->input->get('new'))
 		{
