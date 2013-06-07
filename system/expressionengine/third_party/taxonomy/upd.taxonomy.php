@@ -41,9 +41,9 @@ class Taxonomy_upd extends Taxonomy_base {
 			'has_publish_fields'	=> 'n'
 		);
 		
-		$this->EE->db->insert('modules', $mod_data);
+		ee()->db->insert('modules', $mod_data);
 		
-		$this->EE->load->dbforge();
+		ee()->load->dbforge();
 		
 		$fields = array(
 
@@ -107,9 +107,9 @@ class Taxonomy_upd extends Taxonomy_base {
 			)
 		);
 
-		$this->EE->dbforge->add_field($fields);
-		$this->EE->dbforge->add_key('id', TRUE);
-		$this->EE->dbforge->create_table('taxonomy_trees');
+		ee()->dbforge->add_field($fields);
+		ee()->dbforge->add_key('id', TRUE);
+		ee()->dbforge->create_table('taxonomy_trees');
 		unset($fields);
 		
 		return TRUE;
@@ -124,31 +124,31 @@ class Taxonomy_upd extends Taxonomy_base {
 	 */	
 	public function uninstall()
 	{
-		$mod_id = $this->EE->db->select('module_id')
+		$mod_id = ee()->db->select('module_id')
 								->get_where('modules', array(
 									'module_name'	=> 'Taxonomy'
 								))->row('module_id');
 		
-		$this->EE->db->where('module_id', $mod_id)
+		ee()->db->where('module_id', $mod_id)
 					 ->delete('module_member_groups');
 		
-		$this->EE->db->where('module_name', 'Taxonomy')
+		ee()->db->where('module_name', 'Taxonomy')
 					 ->delete('modules');
 		
 		// -------------------------------------
 		//  Remove our Trees
 		// -------------------------------------
-		$query = $this->EE->db->get('exp_taxonomy_trees');
+		$query = ee()->db->get('exp_taxonomy_trees');
 		
 		if ($query->num_rows() > 0)
 		{
 			foreach($query->result_array() as $row)
 			{
-				$this->EE->dbforge->drop_table('taxonomy_tree_'.$row['id']);
+				ee()->dbforge->drop_table('taxonomy_tree_'.$row['id']);
 			}
 		}
 		
-		$this->EE->dbforge->drop_table('taxonomy_trees');
+		ee()->dbforge->drop_table('taxonomy_trees');
 		
 		return TRUE;
 	}

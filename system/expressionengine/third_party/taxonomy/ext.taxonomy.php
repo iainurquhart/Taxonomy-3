@@ -14,6 +14,16 @@
  
 // ------------------------------------------------------------------------
 
+if( !function_exists('ee') )
+{
+	function ee()
+	{
+		static $EE;
+		if ( ! $EE) $EE = get_instance();
+		return $EE;
+	}
+}
+
 /**
  * Taxonomy Extension
  *
@@ -42,7 +52,6 @@ class Taxonomy_ext {
 	 */
 	public function __construct($settings = '')
 	{
-		$this->EE =& get_instance();
 		$this->settings = $settings;
 	}
 	
@@ -91,7 +100,7 @@ class Taxonomy_ext {
 			'enabled'	=> 'y'
 		);
 
-		$this->EE->db->insert('extensions', $data);			
+		ee()->db->insert('extensions', $data);			
 		
 	}	
 
@@ -119,8 +128,8 @@ class Taxonomy_ext {
 	 */
 	function disable_extension()
 	{
-		$this->EE->db->where('class', __CLASS__);
-		$this->EE->db->delete('extensions');
+		ee()->db->where('class', __CLASS__);
+		ee()->db->delete('extensions');
 	}
 
 	// ----------------------------------------------------------------------

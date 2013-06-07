@@ -26,7 +26,7 @@
 	else
 	{
 		$this->table->add_row(
-			lang('select_parent'),
+			lang('tx_select_parent'),
 			$parent_select
 		);
 	}
@@ -41,6 +41,41 @@
 			lang('select_template'),
 			form_dropdown($settings['field_name'].'[template_path]', $templates, $data['template_path'])
 		);
+	}
+
+	foreach($tree['fields'] as $taxonomy_field)
+	{
+		$value = (isset($data['field_data'][ $taxonomy_field['name'] ])) ? $data['field_data'][ $taxonomy_field['name'] ] : '';
+		if((isset($taxonomy_field['show_on_publish']) && $taxonomy_field['show_on_publish'] == 1))
+		{
+			if($taxonomy_field['type'] == 'text')
+			{
+				$this->table->add_row(
+					$taxonomy_field['label'],
+					form_input($settings['field_name'].'[field_data]['.$taxonomy_field['name'].']', $value)
+				);
+			}
+			elseif($taxonomy_field['type'] == 'textarea')
+			{
+				$this->table->add_row(
+					$taxonomy_field['label'],
+					form_textarea($settings['field_name'].'[field_data]['.$taxonomy_field['name'].']', $value)
+				);
+			}
+			elseif($taxonomy_field['type'] == 'checkbox')
+			{
+				$this->table->add_row(
+					$taxonomy_field['label'],
+					form_checkbox($settings['field_name'].'[field_data]['.$taxonomy_field['name'].']', 1, $value )
+				);
+			}
+		}
+		else
+		{
+			echo form_hidden($settings['field_name'].'[field_data]['.$taxonomy_field['name'].']', $value);
+		}
+
+		
 	}
 
 	echo $this->table->generate();

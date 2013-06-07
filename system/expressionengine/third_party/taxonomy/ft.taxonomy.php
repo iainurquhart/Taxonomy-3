@@ -63,8 +63,8 @@ class Taxonomy_ft extends EE_Fieldtype {
 	public function __construct()
 	{
 		parent::EE_Fieldtype();
-		$this->site_id = $this->EE->config->item('site_id');
-		$this->cache =& $this->EE->session->cache['taxonomy_ft_data'];
+		$this->site_id = ee()->config->item('site_id');
+		$this->cache =& ee()->session->cache['taxonomy_ft_data'];
 	}
 	
 	
@@ -89,18 +89,18 @@ class Taxonomy_ft extends EE_Fieldtype {
 	{
 
 		
-		$this->EE->lang->loadfile('taxonomy');
-		$this->EE->load->library('table');
-		$this->EE->load->model('taxonomy_model', 'taxonomy');
+		ee()->lang->loadfile('taxonomy');
+		ee()->load->library('table');
+		ee()->load->model('taxonomy_model', 'taxonomy');
 
-		$channel_id = $this->EE->input->get('channel_id');
-		$entry_id   = $this->EE->input->get('entry_id');
+		$channel_id = ee()->input->get('channel_id');
+		$entry_id   = ee()->input->get('entry_id');
 
 		// make sure settings have been set for this channel
 		if(isset($this->settings['taxonomy_options']['channels'][$channel_id]) 
 			&& $this->settings['taxonomy_options']['channels'][$channel_id] != '')
 		{
-			$this->EE->taxonomy->set_table( $this->settings['taxonomy_options']['channels'][$channel_id] );
+			ee()->taxonomy->set_table( $this->settings['taxonomy_options']['channels'][$channel_id] );
 		}
 		// bail out here.
 		else
@@ -114,12 +114,12 @@ class Taxonomy_ft extends EE_Fieldtype {
 		if($entry_id)
 		{
 			// get this node's details
-			$data = $this->EE->taxonomy->get_node( $entry_id, 'entry_id' );
+			$data = ee()->taxonomy->get_node( $entry_id, 'entry_id' );
 			// we have details
 			if($data['node_id'] != '')
 			{
 				// get the parent nodes details
-				$parent = $this->EE->taxonomy->get_node( $data['parent'], 'node_id' );
+				$parent = ee()->taxonomy->get_node( $data['parent'], 'node_id' );
 				$data['parent_lft'] = $parent['lft'];
 			}
 		}
@@ -132,11 +132,27 @@ class Taxonomy_ft extends EE_Fieldtype {
 		$vars['settings'] 	= $this->settings;
 		$vars['nodes']		= array();
 		$vars['templates']	= array();
-		$vars['tree']		= $this->EE->taxonomy->get_tree();
+		$vars['tree']		= ee()->taxonomy->get_tree();
 		$vars['hide_template'] = TRUE;
 
+		// does this tree have custom fields
+		if(isset($vars['tree']['fields']) && $vars['tree']['fields'] != '')
+		{
+			$vars['tree']['fields'] = json_decode($vars['tree']['fields'], TRUE);
+		}
+		else
+		{
+			$vars['tree']['fields'] = array();
+		}
+
+		// check for field data
+		if(isset($data['field_data']) && $data['field_data'] != '')
+		{
+			$vars['data']['field_data'] = json_decode($data['field_data'], TRUE);
+		}
+		
 		// build our parent select field
-		$nodes = $this->EE->taxonomy->get_flat_tree();
+		$nodes = ee()->taxonomy->get_flat_tree();
 
 		if(!$nodes)
 		{
@@ -158,7 +174,7 @@ class Taxonomy_ft extends EE_Fieldtype {
 		// build our template select
 		if(count($vars['tree']['templates']))
 		{
-			$templates = $this->EE->taxonomy->get_templates();
+			$templates = ee()->taxonomy->get_templates();
 			foreach($vars['tree']['templates'] as $template)
 			{
 				$vars['templates'][$template] = $templates['by_id'][$template].'/';
@@ -173,7 +189,7 @@ class Taxonomy_ft extends EE_Fieldtype {
 			$vars['data']['template_path'] = $this->settings['taxonomy_options']['default_template'][$channel_id];
 		}
 
-		return $this->EE->load->view('field', $vars, TRUE);
+		return ee()->load->view('field', $vars, TRUE);
 	}
 	
 	
@@ -214,15 +230,16 @@ class Taxonomy_ft extends EE_Fieldtype {
 
 		if(!$data['label']) return '';
 
-		$this->EE->load->model('taxonomy_model', 'taxonomy');
-		$this->EE->taxonomy->set_table( $data['tree_id'] );
+		ee()->load->model('taxonomy_model', 'taxonomy');
+		ee()->taxonomy->set_table( $data['tree_id'] );
 
 		// get the submitted parent node
-		$parent = $this->EE->taxonomy->get_node( $data['parent_lft'] );
+		$parent = ee()->taxonomy->get_node( $data['parent_lft'] );
 
 		unset($data['parent_lft']); // not needed for insert
 
 		$data['parent'] = $parent['node_id'];
+		$data['depth']  = $parent['depth']+1;
 
 		if(isset($data['template_path']) && $data['template_path'] != '')
 		{
@@ -234,14 +251,19 @@ class Taxonomy_ft extends EE_Fieldtype {
 			$data['type'][] = 'custom';
 		}
 
+		if(isset($data['field_data']) && is_array($data['field_data']))
+		{
+			$data['field_data'] = json_encode($data['field_data']);
+		}
+
 		// updating a node?
 		if( isset($data['node_id']) && $data['node_id'] != '' )
 		{
 			// get existing parent node according to the db
-			$node = $this->EE->taxonomy->get_node( $data['node_id'], 'node_id' );
+			$node = ee()->taxonomy->get_node( $data['node_id'], 'node_id' );
 
 			// get the old parent according to the db
-			$old_parent = $this->EE->taxonomy->get_node( $node['parent'], 'node_id' );
+			$old_parent = ee()->taxonomy->get_node( $node['parent'], 'node_id' );
 
 			// is it different from what the user has submitted?
 			if($parent['lft'] != $old_parent['lft'])
@@ -249,23 +271,23 @@ class Taxonomy_ft extends EE_Fieldtype {
 				// with nested set it's easier just to delete and re-insert
 				// than try some shady ass move. Delete is shady enough, move will
 				// blow your mind.
-				$this->EE->taxonomy->delete_node($node['lft']);
-				$this->EE->taxonomy->append_node_last( $parent['lft'], $data );
+				ee()->taxonomy->delete_node($node['lft']);
+				ee()->taxonomy->append_node_last( $parent['lft'], $data );
 			}
 
-			$this->EE->taxonomy->update_node($data['node_id'], $data);
+			ee()->taxonomy->update_node($data['node_id'], $data);
 			
 		}
 		// inserting a node
 		else
 		{
 			// check if parent is different from previous
-			$this->EE->taxonomy->append_node_last( $parent['lft'], $data );
+			ee()->taxonomy->append_node_last( $parent['lft'], $data );
 			
 		}
 
-		$tree_array = json_encode( $this->EE->taxonomy->get_tree_taxonomy() );
-		$this->EE->taxonomy->update_taxonomy( $tree_array );
+		$tree_array = json_encode( ee()->taxonomy->get_tree_taxonomy() );
+		ee()->taxonomy->update_taxonomy( $tree_array );
 
 		return '';
 	
@@ -318,17 +340,17 @@ class Taxonomy_ft extends EE_Fieldtype {
 	 */
 	public function display_settings($data)
 	{
-		$this->EE->lang->loadfile('taxonomy');
-		$this->EE->load->model('taxonomy_model', 'taxonomy');
+		ee()->lang->loadfile('taxonomy');
+		ee()->load->model('taxonomy_model', 'taxonomy');
 		
 		$vars = array();
 
-		$vars['channels'] = $this->_get_fieldgroup_channels( $this->EE->input->get('group_id') );
-		$vars['trees'] = $this->EE->taxonomy->get_trees();
+		$vars['channels'] = $this->_get_fieldgroup_channels( ee()->input->get('group_id') );
+		$vars['trees'] = ee()->taxonomy->get_trees();
 		$vars['tree_options'] = array('' => '--');
 		$vars['settings'] = (isset($data['taxonomy_options'])) ? $data['taxonomy_options'] : array();
 		$vars['yes_no_options'] = array(0 => lang('no'), 1 => lang('yes'));
-		$vars['templates'] = $this->EE->taxonomy->get_templates();
+		$vars['templates'] = ee()->taxonomy->get_templates();
 
 		foreach( $vars['trees'] as $tree )
 		{
@@ -347,8 +369,8 @@ class Taxonomy_ft extends EE_Fieldtype {
 
 		}
 
-		$this->EE->table->add_row(
-			array('data' => $this->EE->load->view('field_settings', $vars, TRUE), 'colspan' => 2)				
+		ee()->table->add_row(
+			array('data' => ee()->load->view('field_settings', $vars, TRUE), 'colspan' => 2)				
 		);
 			
 	}
@@ -366,7 +388,7 @@ class Taxonomy_ft extends EE_Fieldtype {
 	 */
 	public function save_settings($data)
 	{
-		$options = $this->EE->input->post('options');
+		$options = ee()->input->post('options');
 
 		// a bit messy here, prune out all the input data from template select that we don't need.
 		foreach($options['channels'] as $channel_id => $tree_id)
@@ -391,10 +413,10 @@ class Taxonomy_ft extends EE_Fieldtype {
 	 */
 	private function _add_taxonomy_css()
 	{
-		if (! isset($this->EE->session->cache['taxonomy']['css_added']) )
+		if (! isset(ee()->session->cache['taxonomy']['css_added']) )
 		{
-			$this->EE->session->cache['taxonomy']['css_added'] = 1;
-			$this->EE->cp->add_to_head('<link rel="stylesheet" type="text/css" href="'.$this->EE->config->item('theme_folder_url').'third_party/taxonomy_assets/css/taxonomy.css'.'" />');
+			ee()->session->cache['taxonomy']['css_added'] = 1;
+			ee()->cp->add_to_head('<link rel="stylesheet" type="text/css" href="'.ee()->config->item('theme_folder_url').'third_party/taxonomy_assets/css/taxonomy.css'.'" />');
 		}
 	}
 	
@@ -416,7 +438,7 @@ class Taxonomy_ft extends EE_Fieldtype {
 
 	private function _get_fieldgroup_channels($group_id)
 	{
-		return $this->EE->db->get_where('channels', array('field_group' => $group_id))->result_array();
+		return ee()->db->get_where('channels', array('field_group' => $group_id))->result_array();
 	}
 	
 

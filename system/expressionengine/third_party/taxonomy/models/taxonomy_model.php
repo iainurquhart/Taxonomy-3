@@ -63,13 +63,13 @@ class Taxonomy_model extends Taxonomy_base
 		if($tree_id != NULL || $tree_id != '')
 		{
 			// set our table
-			$this->tree_table 	= $this->EE->db->dbprefix.'taxonomy_tree_'.$tree_id;
+			$this->tree_table 	= ee()->db->dbprefix.'taxonomy_tree_'.$tree_id;
 			$this->tree_id 		= $tree_id;
 
 			// verify the table exists
 			if( !isset($this->cache['set'][$this->tree_id]) )
 			{
-				if ($this->EE->db->table_exists( $this->tree_table ) === FALSE)
+				if (ee()->db->table_exists( $this->tree_table ) === FALSE)
 				{
 					return FALSE;
 				}
@@ -96,7 +96,7 @@ class Taxonomy_model extends Taxonomy_base
 	 */
 	function get_trees()
 	{
-		$trees = $this->EE->db->get_where('taxonomy_trees', array('site_id' => $this->site_id) )->result_array();
+		$trees = ee()->db->get_where('taxonomy_trees', array('site_id' => $this->site_id) )->result_array();
 		// reindex with node ids as keys
 		$data = array();
 		foreach($trees as $tree)
@@ -131,7 +131,7 @@ class Taxonomy_model extends Taxonomy_base
     	}
     	else
     	{
-    		$data = $this->EE->db->get_where('taxonomy_trees', array('id' => $this->tree_id), 1 )->row_array();
+    		$data = ee()->db->get_where('taxonomy_trees', array('id' => $this->tree_id), 1 )->row_array();
 
 			$data['templates'] = ($data['templates']) ? explode('|', $data['templates']) : array();
 			$data['channels'] = ($data['channels']) ? explode('|', $data['channels']) : array();
@@ -160,11 +160,11 @@ class Taxonomy_model extends Taxonomy_base
 
     	if( !isset($this->cache['trees'][$this->tree_id]['nodes']))
     	{
-    		$this->EE->db->select('*');
-			$this->EE->db->from( $this->tree_table );
-			$this->EE->db->join('channel_titles', 'channel_titles.entry_id = '.$this->tree_table.'.entry_id', 'left');
-			$this->EE->db->join('statuses', 'statuses.status = channel_titles.status', 'left');
-    		$nodes = $this->EE->db->get()->result_array();
+    		ee()->db->select('*');
+			ee()->db->from( $this->tree_table );
+			ee()->db->join('channel_titles', 'channel_titles.entry_id = '.$this->tree_table.'.entry_id', 'left');
+			ee()->db->join('statuses', 'statuses.status = channel_titles.status', 'left');
+    		$nodes = ee()->db->get()->result_array();
     		
     		// reindex with node ids as keys
     		$node_data = $entry_data = array();
@@ -216,7 +216,7 @@ class Taxonomy_model extends Taxonomy_base
     		// does the custom url start with a '/', if so add site index
     		if(isset($node['custom_url'][0]) && $node['custom_url'][0] == '/')
     		{
-    			$node['custom_url'] = $this->EE->functions->fetch_site_index().$node['custom_url'];
+    			$node['custom_url'] = ee()->functions->fetch_site_index().$node['custom_url'];
     		}
 
     		$url = $node['custom_url'];
@@ -226,27 +226,31 @@ class Taxonomy_model extends Taxonomy_base
     	elseif( $node['entry_id'] || $node['template_path'] ) 
     	{
 
-    		if($node['template_path'])
-    		{
-    		
-    			$templates = $this->get_templates();
-
-    			$url = (isset($templates['by_id'][ $node['template_path'] ])) ? $templates['by_id'][ $node['template_path'] ] : '';
-
-    			if($node['entry_id'])
-    			{
-    				$url = $url.'/'.$node['url_title'];
-    			}
-
-    			$url = $this->EE->functions->fetch_site_index().$url;
-
-    		}
-
+    		// does this have a pages/structure uri
     		$pages_uri = $this->entry_id_to_page_uri( $node['entry_id'] );
 
     		if($pages_uri)
     		{
     			$url = $pages_uri;
+    		}
+    		else
+    		{
+
+    			if($node['template_path'])
+	    		{
+	    			$templates = $this->get_templates();
+	    			$url .= (isset($templates['by_id'][ $node['template_path'] ])) ? '/'.$templates['by_id'][ $node['template_path'] ] : '';
+	    		}
+
+	    		if($node['entry_id'])
+				{
+					$url .= '/'.$node['url_title'];
+				}
+
+				if($node['entry_id'] || $node['template_path'])
+				{
+					$url = ee()->functions->fetch_site_index().$url;
+				}
     		}
 
     	}
@@ -290,7 +294,7 @@ class Taxonomy_model extends Taxonomy_base
 			$this->load_pages($site_id);
 		}
 		
-		$site_pages = $this->EE->config->item('site_pages');
+		$site_pages = ee()->config->item('site_pages');
 
 		if ($site_pages !== FALSE && isset($site_pages[$site_id]['uris'][$entry_id]))
 		{
@@ -314,13 +318,13 @@ class Taxonomy_model extends Taxonomy_base
 	function load_pages($site_id)
 	{
 		
-		$site_pages = $this->EE->config->item('site_pages');
+		$site_pages = ee()->config->item('site_pages');
 		
 		if( !isset($site_pages[$site_id]) )
 		{
-			$this->EE->db->select('site_pages, site_id');
-			$this->EE->db->where_in('site_id', $site_id);
-			$query = $this->EE->db->get('sites');
+			ee()->db->select('site_pages, site_id');
+			ee()->db->where_in('site_id', $site_id);
+			$query = ee()->db->get('sites');
 	
 			$new_pages = array();
 	
@@ -337,7 +341,7 @@ class Taxonomy_model extends Taxonomy_base
 				}
 			}
 	
-			$this->EE->config->set_item('site_pages', $new_pages);
+			ee()->config->set_item('site_pages', $new_pages);
 		}
 
 	}
@@ -355,7 +359,7 @@ class Taxonomy_model extends Taxonomy_base
 		if($node == false)
 			return false;
 
-		$query = $this->EE->db->select('*')
+		$query = ee()->db->select('*')
 			->from( $this->tree_table )
 			->join('channel_titles', 'channel_titles.entry_id = '.$this->tree_table.'.entry_id', 'left')
 			->where($this->tree_table.".lft BETWEEN ".$node['lft']." AND ".$node['rgt'])
@@ -430,7 +434,7 @@ class Taxonomy_model extends Taxonomy_base
 			'field_data' => ''
 		);
 
-		$query = $this->EE->db->get_where( 
+		$query = ee()->db->get_where( 
 			$this->tree_table, 
 			array($col => $val), 
 			1 
@@ -489,13 +493,13 @@ class Taxonomy_model extends Taxonomy_base
     	
     	if ( ! isset($this->cache['templates']) )
 		{
-			$this->EE->load->model('template_model');
+			ee()->load->model('template_model');
 			$r = $groups = array();
 
 			(int) $site_id = ( !$site_id ) ? $this->site_id : $site_id;
 
-			$templates = $this->EE->template_model->get_templates( $site_id )->result_array();
-			$template_groups = $this->EE->template_model->get_template_groups( $site_id )->result_array(); 
+			$templates = ee()->template_model->get_templates( $site_id )->result_array();
+			$template_groups = ee()->template_model->get_template_groups( $site_id )->result_array(); 
 
 			foreach($template_groups as $template_group)
 			{
@@ -550,10 +554,10 @@ class Taxonomy_model extends Taxonomy_base
 
 			(int) $site_id = ( !$site_id ) ? $this->site_id : $site_id;
 
-			$this->EE->db->select('channel_title, channel_name, channel_id, cat_group, status_group, field_group');
-			$this->EE->db->where('site_id', $site_id);
-			$this->EE->db->order_by('channel_title');
-			$channels = $this->EE->db->get('channels')->result_array(); 
+			ee()->db->select('channel_title, channel_name, channel_id, cat_group, status_group, field_group');
+			ee()->db->where('site_id', $site_id);
+			ee()->db->order_by('channel_title');
+			$channels = ee()->db->get('channels')->result_array(); 
 
 			foreach ($channels as $channel)
 			{
@@ -576,7 +580,7 @@ class Taxonomy_model extends Taxonomy_base
 	 function get_entries($channels)
 	 {
 
-	 	$this->EE->load->model('channel_entries_model');
+	 	ee()->load->model('channel_entries_model');
 
 		$fields = array( 
 			"entry_id", 
@@ -584,7 +588,7 @@ class Taxonomy_model extends Taxonomy_base
 			"title"
 		);
 
-		return $this->EE->channel_entries_model->get_entries( $channels, $fields )->result_array();
+		return ee()->channel_entries_model->get_entries( $channels, $fields )->result_array();
 	 }
 
     // --------------------------------------------------------------------
@@ -603,17 +607,17 @@ class Taxonomy_model extends Taxonomy_base
 		$lastlevel = 0;
 		$level = 1;
 
-		$this->EE->db->select('node_id as id, rgt')->from( $this->tree_table );
+		ee()->db->select('node_id as id, rgt')->from( $this->tree_table );
 
 		if($node != '')
 		{
-			$this->EE->db->where('lft BETWEEN '.$node['lft'].' AND '.$node['rgt']);
+			ee()->db->where('lft BETWEEN '.$node['lft'].' AND '.$node['rgt']);
 		}
 
-		$this->EE->db->group_by($this->tree_table.".lft")
+		ee()->db->group_by($this->tree_table.".lft")
 					 ->order_by($this->tree_table.".lft", "asc");
 
-		$query = $this->EE->db->get();
+		$query = ee()->db->get();
 		
 		foreach($query->result_array() as $row)
 		{
@@ -672,13 +676,13 @@ class Taxonomy_model extends Taxonomy_base
 		if ( ! isset($this->cache['parents'][$this->tree_id][$lft.'|'.$rgt] ))
 		{
 
-			$this->EE->db->select('node_id')
+			ee()->db->select('node_id')
 						 ->where('lft <', $lft)
 						 ->where('rgt >', $rgt)
 						 ->group_by("lft")
 						 ->order_by("lft", "asc");
 
-			$data = $this->EE->db->get( $this->tree_table )->result_array();
+			$data = ee()->db->get( $this->tree_table )->result_array();
 
 			$return = array();
 			
@@ -718,8 +722,9 @@ class Taxonomy_model extends Taxonomy_base
 			return false;
 		}
 		$data = $this->_sanitize_data( $data );
+		$data['depth'] = 0;
 		$data = array_merge( $data, array('lft' => 1, 'rgt' => 2) );
-		$this->EE->db->insert( $this->tree_table, $data );
+		ee()->db->insert( $this->tree_table, $data );
 		$this->_unlock_tree_table();
 		return true;
 	}
@@ -749,21 +754,21 @@ class Taxonomy_model extends Taxonomy_base
 		if ($lock)
 			$this->_lock_tree_table();
 
-		$this->EE->db->query('UPDATE '.$this->tree_table.
+		ee()->db->query('UPDATE '.$this->tree_table.
 						' SET lft = lft + 2 '.
 						' WHERE lft >= '.$lft);
 
-		$this->EE->db->query('UPDATE '.$this->tree_table.
+		ee()->db->query('UPDATE '.$this->tree_table.
 						' SET rgt = rgt + 2 '.
 						' WHERE rgt >= '.$lft);
 		
 		$data = array_merge( $data, array('lft' => $lft, 'rgt' => $lft+1) );
-		$this->EE->db->insert( $this->tree_table, $data );
+		ee()->db->insert( $this->tree_table, $data );
 		
 		if ($lock)
 			$this->_unlock_tree_table();
 		
-		return array( $lft, $lft + 1, $this->EE->db->insert_id() );
+		return array( $lft, $lft + 1, ee()->db->insert_id() );
 	}
 
 	// --------------------------------------------------------------------
@@ -804,21 +809,22 @@ class Taxonomy_model extends Taxonomy_base
 				'node_id' => $node['item_id'],
 				'lft' 	  => $node['left'],
 				'rgt' 	  => $node['right'],
-				'parent'  => $node['parent_id']
+				'parent'  => $node['parent_id'],
+				'depth'	  => $node['depth']-1
 			);
 
 			if($node['left'] == 1) // root node
 			{
 				unset($data['node_id']); 
 				$data['parent'] = 0;
-				$this->EE->db->where('lft', $data['lft']);
-				$this->EE->db->update($this->tree_table, $data);
+				ee()->db->where('lft', $data['lft']);
+				ee()->db->update($this->tree_table, $data);
 			}
 			else
 			{
 				$data['parent'] = ($data['parent']) ? $data['parent'] : $root_node['node_id'];
-				$this->EE->db->where('node_id', $data['node_id']);
-				$this->EE->db->update($this->tree_table, $data);
+				ee()->db->where('node_id', $data['node_id']);
+				ee()->db->update($this->tree_table, $data);
 			}
 
 		}
@@ -838,7 +844,7 @@ class Taxonomy_model extends Taxonomy_base
 	 */
 	function _lock_tree_table()
 	{
-		$this->EE->db->query("LOCK TABLE " .$this->tree_table . " WRITE");
+		ee()->db->query("LOCK TABLE " .$this->tree_table . " WRITE");
 	}
 
 	/**
@@ -848,7 +854,7 @@ class Taxonomy_model extends Taxonomy_base
 	function _unlock_tree_table()
 	{
 		$q = "UNLOCK TABLES";
-		$this->EE->db->query($q);
+		ee()->db->query($q);
 	}
 
 
@@ -864,8 +870,8 @@ class Taxonomy_model extends Taxonomy_base
 		if($tree_array)
 			$data['taxonomy'] = $tree_array;
 		
-		$this->EE->db->where('id', $this->tree_id);
-		$this->EE->db->update( 'taxonomy_trees', $data ); 
+		ee()->db->where('id', $this->tree_id);
+		ee()->db->update( 'taxonomy_trees', $data ); 
 	 }
 
 	// --------------------------------------------------------------------
@@ -882,14 +888,14 @@ class Taxonomy_model extends Taxonomy_base
     {
     	if(isset($data['id']) && $data['id'] != '')
     	{
-    		$this->EE->db->where('id', $data['id']);
-			$this->EE->db->update('taxonomy_trees', $data);
+    		ee()->db->where('id', $data['id']);
+			ee()->db->update('taxonomy_trees', $data);
 			return $data['id'];
     	}
     	else
     	{
-    		$this->EE->db->insert('taxonomy_trees', $data);
-    		$id = $this->EE->db->insert_id();
+    		ee()->db->insert('taxonomy_trees', $data);
+    		$id = ee()->db->insert_id();
     		$this->build_tree_table( $id );
     		return $id;
     	}
@@ -910,8 +916,8 @@ class Taxonomy_model extends Taxonomy_base
 	{
 		$data = $this->_sanitize_data($data);
 		// Make the update
-		$this->EE->db->where( 'node_id', $node_id );
-		$this->EE->db->update( $this->tree_table, $data );
+		ee()->db->where( 'node_id', $node_id );
+		ee()->db->update( $this->tree_table, $data );
 		return true;
 	}
 
@@ -926,7 +932,7 @@ class Taxonomy_model extends Taxonomy_base
 	 */
     function get_root()
     {	
-		$query = $this->EE->db->get_where( $this->tree_table, array('lft' => 1), 1 );
+		$query = ee()->db->get_where( $this->tree_table, array('lft' => 1), 1 );
 		return ( $query->num_rows() ) ? $query->row_array() : FALSE;
     }
 
@@ -986,10 +992,10 @@ class Taxonomy_model extends Taxonomy_base
 
 			(int) $site_id = ( !$site_id ) ? $this->site_id : $site_id;
 
-			$this->EE->db->select( "group_id, group_title" );
-			$this->EE->db->from( "member_groups" );
-			$this->EE->db->where( "site_id", $site_id );
-			$groups =  $this->EE->db->get()->result_array();
+			ee()->db->select( "group_id, group_title" );
+			ee()->db->from( "member_groups" );
+			ee()->db->where( "site_id", $site_id );
+			$groups =  ee()->db->get()->result_array();
 
 			foreach ($groups as $group)
 			{
@@ -1017,10 +1023,10 @@ class Taxonomy_model extends Taxonomy_base
 		{
 			$r = array();
 
-			$this->EE->db->select( 'modules.module_id, module_member_groups.group_id' );
-			$this->EE->db->where( 'LOWER('.$this->EE->db->dbprefix.'modules.module_name)', TAXONOMY_SHORT_NAME );
-			$this->EE->db->join( 'module_member_groups', 'module_member_groups.module_id = modules.module_id' );
-			$groups = $this->EE->db->get('modules')->result_array();
+			ee()->db->select( 'modules.module_id, module_member_groups.group_id' );
+			ee()->db->where( 'LOWER('.ee()->db->dbprefix.'modules.module_name)', TAXONOMY_SHORT_NAME );
+			ee()->db->join( 'module_member_groups', 'module_member_groups.module_id = modules.module_id' );
+			$groups = ee()->db->get('modules')->result_array();
 
 			foreach ($groups as $group)
 			{
@@ -1063,6 +1069,12 @@ class Taxonomy_model extends Taxonomy_base
 			),
 										
 			'rgt' => array(
+				'type' => 'mediumint',
+				'constraint'	=> '8',
+				'unsigned'	=>	TRUE
+			),
+
+			'depth' => array(
 				'type' => 'mediumint',
 				'constraint'	=> '8',
 				'unsigned'	=>	TRUE
@@ -1112,10 +1124,10 @@ class Taxonomy_model extends Taxonomy_base
 			)			
 		);
 			
-		$this->EE->load->dbforge();
-		$this->EE->dbforge->add_field( $fields );
-		$this->EE->dbforge->add_key( 'node_id', TRUE );
-		$this->EE->dbforge->create_table( 'taxonomy_tree_'.$tree_id );
+		ee()->load->dbforge();
+		ee()->dbforge->add_field( $fields );
+		ee()->dbforge->add_key( 'node_id', TRUE );
+		ee()->dbforge->create_table( 'taxonomy_tree_'.$tree_id );
 		
 		unset($fields);
 				
@@ -1140,8 +1152,8 @@ class Taxonomy_model extends Taxonomy_base
 			return FALSE;
 		// Lock table
 		$this->_lock_tree_table();
-		$this->EE->db->where( 'node_id', $node['node_id'] );
-		$this->EE->db->delete(  $this->tree_table);
+		ee()->db->where( 'node_id', $node['node_id'] );
+		ee()->db->delete(  $this->tree_table);
 		$this->remove_gaps();
 		$this->_unlock_tree_table();
 		return TRUE;
@@ -1161,8 +1173,8 @@ class Taxonomy_model extends Taxonomy_base
 			return FALSE;
 		// lock table
 		$this->_lock_tree_table();
-		$this->EE->db->where('lft BETWEEN '.$node['lft'].' AND '.$node['rgt']);
-		$this->EE->db->delete( $this->tree_table );
+		ee()->db->where('lft BETWEEN '.$node['lft'].' AND '.$node['rgt']);
+		ee()->db->delete( $this->tree_table );
 		$this->remove_gaps();
 		$this->_unlock_tree_table();
 		return TRUE;
@@ -1192,11 +1204,11 @@ class Taxonomy_model extends Taxonomy_base
 			return FALSE;
 		}
 
-		$this->EE->db->query('UPDATE '.$this->tree_table.
+		ee()->db->query('UPDATE '.$this->tree_table.
 			' SET lft = lft + '.$size.
 			' WHERE lft >='.$pos);
 
-		$this->EE->db->query('UPDATE '.$this->tree_table.
+		ee()->db->query('UPDATE '.$this->tree_table.
 			' SET rgt = rgt'.' + '.$size.
 			' WHERE rgt >='.$pos);
 
@@ -1227,11 +1239,11 @@ class Taxonomy_model extends Taxonomy_base
 		$ret = $this->get_first_gap();
 		if($ret !== false)
 		{
-			$this->EE->db->query('UPDATE '.$this->tree_table.
+			ee()->db->query('UPDATE '.$this->tree_table.
 				' SET lft = lft - '.$ret['size'].
 				' WHERE lft > '. $ret['start']);
 
-			$this->EE->db->query('UPDATE '.$this->tree_table.
+			ee()->db->query('UPDATE '.$this->tree_table.
 				' SET rgt = rgt - '.$ret['size'].
 				' WHERE rgt > '. $ret['start']);
 			return true;
@@ -1267,9 +1279,9 @@ class Taxonomy_model extends Taxonomy_base
 	function find_gaps()
 	{
 		// Get all lfts and rgts and sort them in a list
-		$this->EE->db->select('lft, rgt');
-		$this->EE->db->order_by('lft','asc');
-		$table = $this->EE->db->get( $this->tree_table );
+		ee()->db->select('lft, rgt');
+		ee()->db->order_by('lft','asc');
+		$table = ee()->db->get( $this->tree_table );
 
 		$nums = array();
 
@@ -1351,6 +1363,32 @@ class Taxonomy_model extends Taxonomy_base
 		unset($data['parent_lft']);
 		return $data;
 	}
+
+	/*
+     * This function finds a node inside a subset, uses self-recursion.
+     */
+    function find_node($tree, $key='', $val='')
+    {
+        if(isset($tree[$key]) && $tree[$key] == $val)
+        {
+        	if(isset($tree['children']))
+        	{
+        		unset($tree['children']);
+        	}
+        	$this->cache['temp_node'] = $tree;
+        }
+        else
+        {
+            if(isset($tree['children']))
+            {
+                foreach($tree['children'] as $child)
+                {
+                    $this->find_node($child, $key, $val);
+                } 
+            }
+        }
+  
+    }
 
 
 	/*

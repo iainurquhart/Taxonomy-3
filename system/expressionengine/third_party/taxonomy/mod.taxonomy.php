@@ -66,11 +66,235 @@ class Taxonomy extends Taxonomy_base {
 
 	private $vars = array();
 	
+	
 
 	// --------------------------------------------------------------------
-	//  M E T H O D S
+	//  P U B L I C   M E T H O D S
 	// --------------------------------------------------------------------
+
+	public function get_node()
+	{
+		return $this->_get_node(FALSE);
+	}
+
+	public function set_node()
+	{
+		return $this->_get_node();
+	}
+
+	/**
+     * The the url for a node from tree_id + (entry_id or node_id)
+	 */	
+	function node_url()
+	{
+		
+		$tree_id 		= $this->_get_this('tree_id');
+		$entry_id 		= $this->_get_this('entry_id');
+		$node_id 		= $this->_get_this('node_id');
+		$use_relative 	= $this->get_param('use_relative', FALSE);
+
+		if(!$tree_id || (!$node_id && !$entry_id))
+			return '';
+
+		ee()->load->model('taxonomy_model');
+
+		if( ee()->taxonomy->set_table( $tree_id ) === FALSE )
+		{
+			ee()->TMPL->log_item("TAXONOMY:NAV: Returning NULL; Tree requested does not exist.");
+			return '';
+		} 
+
+		ee()->taxonomy->get_nodes();
+		$node_cache = (isset($this->cache['trees'][$tree_id]['nodes'])) ? $this->cache['trees'][$tree_id]['nodes'] : '';
+
+		// via entry_id
+		if($entry_id && isset($node_cache['by_entry_id'][$entry_id]))
+		{
+			$node_id = $node_cache['by_entry_id'][$entry_id];
+		}
+
+		if($node_id && isset($node_cache['by_node_id'][$node_id]['url']))
+		{
+			
+			if($use_relative) // bleh
+			{
+				return str_replace($this->site_url, '', $node_cache['by_node_id'][$node_id]['url']);
+			}
+			else
+			{
+				return $node_cache['by_node_id'][$node_id]['url'];
+			}
+			
+		}
+
+	}
+
+
+	// ----------------------------------------------------------------
 	
+	
+	/**
+	 * Generates a breadcrumb trail from the current node with a specified entry_id/node_id
+	 */
+	function breadcrumbs()
+	{
+		
+		$tree_id 		= $this->_get_this('tree_id');
+		$entry_id 		= $this->_get_this('entry_id');
+		$node_id 		= $this->_get_this('node_id');
+
+		if(!$tree_id)
+			return NULL;
+
+		ee()->load->model('taxonomy_model');
+
+		ee()->taxonomy->set_table( $tree_id );
+
+		$display_root 	= $this->get_param('display_root', 'yes');
+		$include_here 	= $this->get_param('include_here');
+		$reverse 		= $this->get_param('reverse', 'no');
+		$title_field 	= $this->get_param('title_field', 'node_title');
+		$wrap_ul 		= $this->get_param('wrap_ul', 'no');
+
+		$this->return_data = $here = '';
+		$depth = 0;	
+
+		// load what we need
+		$tree = ee()->taxonomy->get_tree();
+		ee()->taxonomy->get_nodes(); // loads the session array with node data
+
+		$node_cache = (isset($this->cache['trees'][$tree_id]['nodes'])) ? $this->cache['trees'][$tree_id]['nodes'] : array();
+
+		// extract node_id from entry_id
+		if($entry_id)
+		{
+			if(isset($node_cache['by_entry_id'][$entry_id]))
+			{
+				$node_id = $node_cache['by_entry_id'][$entry_id];
+			}
+		}
+		// no entry_id or node_id, try and extract
+		if(!$entry_id && !$node_id)
+		{
+			if(isset($node_cache['by_node_id']) && is_array($node_cache['by_node_id']))
+			{
+				foreach($node_cache['by_node_id'] as $key => $cached_node)
+				{
+					if($cached_node['url'] == current_url())
+					{
+						$this_node = $node_cache['by_node_id'][$key];
+						break;
+					}
+
+				}
+			}
+		}
+		else
+		{
+			$this_node = (isset($node_cache['by_node_id'][$node_id])) ? $node_cache['by_node_id'][$node_id] : $this->node_vars;
+		}
+
+		// don't have a node, bail out
+		if(!isset($this_node) || $this_node['lft'] == '')
+			return ee()->TMPL->no_results();
+
+		$parents = ee()->taxonomy->get_all_parents( $this_node['lft'], $this_node['rgt'] );
+		
+		// set our current node vars
+		$this_node_vars = array(
+			'node_id' => $this_node['node_id'],
+			'node_title' => $this_node['label'],
+			'node_url' => $this_node['url'],
+			'node_relative_url' => '', // @todo
+			'node_lft' => $this_node['lft'],
+			'node_rgt' => $this_node['rgt'],
+			'node_entry_id' => $this_node['entry_id'],
+			'node_custom_url' => $this_node['custom_url'],
+			'node_field_data' => $this_node['field_data'],
+			'node_entry_title' => $this_node['title'],
+			'node_entry_url_title' => $this_node['url_title'],
+			'node_entry_status' => $this_node['url'],
+			'node_entry_entry_date' => $this_node['status'],
+			'node_entry_expiration_date' => $this_node['expiration_date'],
+			'node_entry_template_name' => '',
+			'node_entry_template_group_name' => '',
+			'node_has_children' => (isset($this_node['children'])) ? 1 : 0,
+			'node_next_child' => $this_node['lft']+1,
+			'here' => 1,
+			'not_here' => '',
+			'node_count' => count($parents)+1,
+			'node_total_count' => count($parents)+1,
+			'node_level' => count($parents)
+		);
+
+		$vars = array();
+
+		if(count($parents))
+		{		
+			foreach($parents as $key => $p_id)
+			{
+				if((isset($node_cache['by_node_id'][$p_id])))
+				{
+					$att = $node_cache['by_node_id'][$p_id];
+					$vars[] = array(
+						'node_id' => $att['node_id'],
+						'node_title' => $att['label'],
+						'node_url' => $att['url'],
+						'node_relative_url' => '', // @todo
+						'node_lft' => $att['lft'],
+						'node_rgt' => $att['rgt'],
+						'node_entry_id' => $att['entry_id'],
+						'node_custom_url' => $att['custom_url'],
+						'node_field_data' => $att['field_data'],
+						'node_entry_title' => $att['title'],
+						'node_entry_url_title' => $att['url_title'],
+						'node_entry_status' => $att['url'],
+						'node_entry_entry_date' => $att['status'],
+						'node_entry_expiration_date' => $att['expiration_date'],
+						'node_entry_template_name' => '',
+						'node_entry_template_group_name' => '',
+						'node_has_children' => (isset($node['children'])) ? 1 : 0,
+						'node_next_child' => $att['lft']+1,
+						'here' => '',
+						'not_here' => 1,
+						'node_count' => $key+1,
+						'node_total_count' => count($parents)+1,
+						'node_level' => $key
+					);
+				}
+			}
+			$vars[] = $this_node_vars; // append our current
+		}
+		else
+		{
+			$vars[] = $this_node_vars; // no parents, just our current node then
+		}
+
+		if($reverse == 'yes')
+		{
+			 $vars = array_reverse($vars);
+			 foreach($vars as $key => &$var)
+			 {
+			 	$var['node_count'] = $key+1;
+			 }
+		}
+
+		$r = ee()->TMPL->parse_variables(ee()->TMPL->tagdata, $vars);
+
+		if($wrap_ul == 'yes')
+		{
+			$r = "<ul>".$r."</ul>";
+		}
+
+		return $r;
+
+		
+	}
+	
+
+	// --------------------------------------------------------------------
+
+
 	/**
 	 * Nav
 	 *
@@ -91,14 +315,15 @@ class Taxonomy extends Taxonomy_base {
 		$use_relative 	= $this->get_param('use_relative', FALSE);
 		$url_base 		= ($use_relative === FALSE) ? $this->site_url : '';
 
-		$this->EE->load->model('taxonomy_model', 'taxonomy');
-		$this->EE->load->helper('url');
+		ee()->load->model('taxonomy_model', 'taxonomy');
+		ee()->load->helper('url');
 		
-		if( $this->EE->taxonomy->set_table( $tree_id ) === FALSE )
+		if( ee()->taxonomy->set_table( $tree_id ) === FALSE )
 		{
-			$this->EE->TMPL->log_item("TAXONOMY:NAV: Returning NULL; Tree requested does not exist.");
+			ee()->TMPL->log_item("TAXONOMY:NAV: Returning NULL; Tree requested does not exist.");
 			return '';
 		} 
+
 
 		// tag parameters
 		// --------------------------------------------------
@@ -120,7 +345,7 @@ class Taxonomy extends Taxonomy_base {
 			'entry_status' => ($this->get_param('entry_status') ) ? explode('|', $this->get_param('entry_status')) : array('open'),
 			'active_branch_start_level' => $this->get_param('active_branch_start_level', 0),
 			'node_active_class' => $this->get_param('node_active_class', 'active'),
-			'site_id' => $this->get_param('site_id', $this->EE->config->item('site_id')),
+			'site_id' => $this->get_param('site_id', ee()->config->item('site_id')),
 			'require_valid_entry_id' => $this->get_param('require_valid_entry_id', FALSE),
 			'html_before' => $this->get_param('html_before', ''),
 			'html_after' => $this->get_param('html_after', ''),
@@ -129,7 +354,7 @@ class Taxonomy extends Taxonomy_base {
 			'exclude_node_id' => ( $this->get_param('exclude_node_id') ) ? explode('|', $this->get_param('exclude_node_id')) : array(),
 			'exclude_entry_id' => ( $this->get_param('exclude_entry_id') ) ? explode('|', $this->get_param('exclude_entry_id')) : array(),
 			'siblings_only' => $this->get_param('siblings_only', ''),
-			'timestamp' => ($this->EE->TMPL->cache_timestamp != '') ? $this->EE->TMPL->cache_timestamp : $this->EE->localize->now,
+			'timestamp' => (ee()->TMPL->cache_timestamp != '') ? ee()->TMPL->cache_timestamp : ee()->localize->now,
 			'show_future_entries' => $this->get_param('show_future_entries', 'no'),
 			'show_expired' => $this->get_param('show_expired', 'no'),
 			'template_path' => $this->get_param('template_path', ''),
@@ -142,31 +367,33 @@ class Taxonomy extends Taxonomy_base {
 		);
 		// --------------------------------------------------
 
-
+		
 		// per-level parameters / Cheers Rob Sanchez (@_rsan)
 		// --------------------------------------------------
-		foreach ($this->EE->TMPL->tagparams as $key => $value)
+		if(is_array(ee()->TMPL->tagparams))
 		{
-			if (strncmp($key, 'ul_css_id:level_', 16) === 0)
+			foreach (ee()->TMPL->tagparams as $key => $value)
 			{
-				$params[$key] = $value;
-			}
-			elseif (strncmp($key, 'ul_css_class:level_', 19) === 0)
-			{
-				$params[$key] = $value;
-			}
-			elseif (strncmp($key, 'li_css_class:level_', 19) === 0)
-			{
-				$params[$key] = $value;
+				if (strncmp($key, 'ul_css_id:level_', 16) === 0)
+				{
+					$params[$key] = $value;
+				}
+				elseif (strncmp($key, 'ul_css_class:level_', 19) === 0)
+				{
+					$params[$key] = $value;
+				}
+				elseif (strncmp($key, 'li_css_class:level_', 19) === 0)
+				{
+					$params[$key] = $value;
+				}
 			}
 		}
 		// --------------------------------------------------
 
 
 		// load what we need
-		$tree = $this->EE->taxonomy->get_tree();
-		$this->EE->taxonomy->get_nodes(); // loads the session array with node data
-
+		$tree = ee()->taxonomy->get_tree();
+		ee()->taxonomy->get_nodes(); // loads the session array with node data
 
 		// setup default values for our taxonomy custom fields
 		// --------------------------------------------------
@@ -186,7 +413,8 @@ class Taxonomy extends Taxonomy_base {
 		// Assertain current node
 		// --------------------------------------------------
 		$this_node = ''; // assume we don't know current node
-		$node_cache = (isset($this->cache['trees'][$tree_id]['nodes'])) ? $this->cache['trees'][$tree_id]['nodes'] : ''; // shortcut
+		$node_cache = (isset($this->cache['trees'][$tree_id]['nodes'])) 
+						? $this->cache['trees'][$tree_id]['nodes'] : ''; // shortcut
 
 		// by entry id
 		if($entry_id)
@@ -197,7 +425,8 @@ class Taxonomy extends Taxonomy_base {
     			$this_node = (isset($node_cache['by_node_id'][ $node_cache['by_entry_id'][ $entry_id ] ])) 
     							? $node_cache['by_node_id'][ $node_cache['by_entry_id'][ $entry_id ] ] 
     								: '';
-    			$params['entry_id'] = $this_node['entry_id'];
+    								
+    			$params['node_id'] = $this_node['node_id'];
     		}
     		elseif($params['require_valid_entry_id'] == "yes" && !isset($node_cache['by_entry_id'][ $entry_id ]))
     		{
@@ -235,7 +464,7 @@ class Taxonomy extends Taxonomy_base {
 		// --------------------------------------------------
 		if($this_node && $this_node['lft'] != '')
 		{
-			$params['parents'] = $this->EE->taxonomy->get_all_parents( $this_node['lft'], $this_node['rgt'] );
+			$params['parents'] = ee()->taxonomy->get_all_parents( $this_node['lft'], $this_node['rgt'] );
 		}
 		// --------------------------------------------------
 
@@ -260,11 +489,11 @@ class Taxonomy extends Taxonomy_base {
 			{	
 
 				$items = array();
-				$this->EE->taxonomy->flatten_tree( $tree, $params['active_branch_start_level'], $items );
+				ee()->taxonomy->flatten_tree( $tree, $params['active_branch_start_level'], $items );
 
 				foreach($items as $item)
 				{
-					if($this->EE->taxonomy->find_in_subset($item, $this_node['node_id'], $params['depth'], 'id'))
+					if(ee()->taxonomy->find_in_subset($item, $this_node['node_id'], $params['depth'], 'id'))
 					{
 						$tree = array($item);
 						break;
@@ -278,7 +507,7 @@ class Taxonomy extends Taxonomy_base {
 			// --------------------------------------------------
 
 
-			$tree_id = $this->EE->taxonomy->tree_id; // shortcut
+			$tree_id = ee()->taxonomy->tree_id; // shortcut
 			$tree_cache = (isset($this->cache['trees'][$tree_id])) ? $this->cache['trees'][$tree_id] : ''; // shortcut
 
 
@@ -293,10 +522,10 @@ class Taxonomy extends Taxonomy_base {
 				}
 				else
 				{
-					$node = $this->EE->taxonomy->get_node($params['root_node_id'], 'node_id');
+					$node = ee()->taxonomy->get_node($params['root_node_id'], 'node_id');
 				}
 				
-				$tree = $this->EE->taxonomy->get_tree_taxonomy($node);
+				$tree = ee()->taxonomy->get_tree_taxonomy($node);
 			}
 			// are we starting with a root node entry_id?
 			// query to get the root 
@@ -315,23 +544,23 @@ class Taxonomy extends Taxonomy_base {
 				}
 				else
 				{
-					$node = $this->EE->taxonomy->get_node($params['root_node_entry_id'], 'entry_id');
+					$node = ee()->taxonomy->get_node($params['root_node_entry_id'], 'entry_id');
 				}
 				
-				$tree = $this->EE->taxonomy->get_tree_taxonomy($node);
+				$tree = ee()->taxonomy->get_tree_taxonomy($node);
 			}
 			// starting with a lft value that isn't the root's?
 			elseif($params['root_lft'] != 1)
 			{
-				$node = $this->EE->taxonomy->get_node($params['root_lft'], 'lft');
-				$tree = $this->EE->taxonomy->get_tree_taxonomy($node);
+				$node = ee()->taxonomy->get_node($params['root_lft'], 'lft');
+				$tree = ee()->taxonomy->get_tree_taxonomy($node);
 			}
 			// --------------------------------------------------
 
 
 			// --------------------------------------------------
 			// tally ho.
-			$r = $this->_build_nav( $this->EE->TMPL->tagdata, $tree, $params);
+			$r = $this->_build_nav( ee()->TMPL->tagdata, $tree, $params);
 			// --------------------------------------------------
 
 
@@ -346,12 +575,263 @@ class Taxonomy extends Taxonomy_base {
 		return $r;
 
 	}
-	// ---------------------------------------------------------------
+
+	// ----------------------------------------------------------------
+	
+	public function entries()
+	{	
+		
+		$tree_id 		= $this->_get_this('tree_id');
+
+		// no tree, no partay.
+		if(!$tree_id)
+			return '';
+
+		$entry_id 		= $this->_get_this('entry_id');
+		$node_id 		= $this->_get_this('node_id');
+
+		// single vars swapped out with the tx: prefix
+		if(is_array(ee()->TMPL->var_single))
+		{
+			foreach(ee()->TMPL->var_single as $key => $var)
+			{
+				$new_key = str_replace('tx:', '', $key);
+				ee()->TMPL->var_single[$new_key] = $new_key;
+				unset(ee()->TMPL->var_single[$key]);
+			}
+		}
+
+		// this is pretty skanky, leave in for now...
+		// @todo test with some tag pairs
+		if(is_array(ee()->TMPL->var_pair))
+		{
+			foreach(ee()->TMPL->var_pair as $key => $var)
+			{
+				$new_key = str_replace('tx:', '', $key);
+				ee()->TMPL->var_pair[$new_key] = $var;
+				unset(ee()->TMPL->var_pair[$key]);
+			}
+		}
+
+		// basic find/replaces
+		ee()->TMPL->tagdata = str_replace('tx:', '', ee()->TMPL->tagdata);
+		ee()->load->library('taxonomy_entries');
+
+		// load what we need from the tree structure
+		$tree = ee()->taxonomy->get_tree();
+		ee()->taxonomy->get_nodes(); // loads the session array with node data
+
+		// entries by parent_entry_id
+		// ----------------------------------------------------------------
+		$parent_entry_id = $this->get_param('parent_entry_id');
+
+		if($parent_entry_id)
+		{
+
+			$this_node = ee()->taxonomy->get_node( $parent_entry_id, 'entry_id');
+			$node_cache = (isset($this->cache['trees'][$tree_id]['nodes'])) 
+						? $this->cache['trees'][$tree_id]['nodes'] : ''; // shortcut
+			
+			$ids = array();
+
+			if($node_cache)
+			{
+				if(isset($node_cache['by_node_id']) && is_array($node_cache['by_node_id']))
+				{
+					foreach($node_cache['by_node_id'] as $node)
+					{
+						if($this_node['node_id'] == $node['parent'] && $node['entry_id'] != '')
+						{	
+							$ids[$node['lft']] = $node['entry_id'];
+						}
+					}
+					ksort($ids);
+					$ids = implode('|', $ids);
+				}
+			}
+
+			if(!$ids) return '';
+
+			ee()->TMPL->tagparams['fixed_order'] = $ids;
+		}
+		// ----------------------------------------------------------------
+
+		return ee()->taxonomy_entries->entries();
+	}
+	
+	// ----------------------------------------------------------------
+	
+
+	public function prep_vars()
+	{
+		$prefix = $this->EE->TMPL->tagparams['var_prefix'];
+		return str_replace($prefix, '', $this->EE->TMPL->tagdata);
+
+	}
+	
+
+	// --------------------------------------------------------------------
+	//  P R I V A T E   M E T H O D S
+	// --------------------------------------------------------------------
+
+	/**
+     * Get information about a particular node
+     * Set the tree/node for all subsequent tags
+	 */	
+	private function _get_node($set = TRUE)
+	{
+		
+		$add_globals = $this->get_param('add_globals', 'no');
+
+		// via key/val
+		$key = $this->get_param('key');
+		$val = $this->get_param('val');
+		$var_prefix = $this->get_param('var_prefix', 'this_');
+
+		// set the tree id
+		$tree_id = $this->_get_this('tree_id');
+
+		if($tree_id)
+			$this->cache['this_node']['tree_id'] = $tree_id;
+		else
+			return NULL; // no tree_id no partay
+
+		ee()->load->model('taxonomy_model', 'taxonomy');
+		ee()->taxonomy->set_table( $tree_id );
+		ee()->taxonomy->get_tree();
+		ee()->taxonomy->get_nodes();
+
+		// shortcut ref to our tree's node data
+		$nodes = (isset($this->cache['trees'][$tree_id]['nodes']['by_node_id'])) ? $this->cache['trees'][$tree_id]['nodes']['by_node_id'] : array();
+
+		$node_id = $this->_get_this('node_id');
+		$entry_id = $this->_get_this('entry_id');
+
+		// set via node_id
+		if($node_id)
+		{
+			if($set === TRUE) $this->cache['this_node']['node_id'] = $node_id;
+			$val = $node_id;
+			$key = 'node_id';
+		}
+		elseif($entry_id)
+		{
+			if($set === TRUE) $this->cache['this_node']['entry_id'] = $entry_id;
+			$val = $entry_id;
+			$key = 'entry_id';
+
+			$node_id = (isset($this->cache['trees'][$tree_id]['nodes']['by_entry_id'][$entry_id]))
+						 ? $this->cache['trees'][$tree_id]['nodes']['by_entry_id'][$entry_id] : '';
+		}
+		elseif($key && $val)
+		{
+			foreach($nodes as $node)
+			{
+				if(isset($node[$key]) && $node[$key] == $val)
+				{
+					$node_id = $this->cache['this_node']['node_id'] = $node['node_id'];
+					break;
+				}
+			}
+		}
+
+		// can't find a node, just bail out
+		if(!$node_id)
+			return '';
+
+		// is this node a parent of others?
+		foreach($nodes as $node)
+		{
+			if($node['parent'] == $node_id)
+			{	
+				$this->cache['trees'][$tree_id]['nodes']['by_node_id'][$node_id]['has_children'] = 1;
+				break;
+			}
+		}
+				
+		if(isset($this->cache['trees'][$tree_id]['nodes']['by_node_id'][$node_id]))
+		{
+			$node = $this->cache['trees'][$tree_id]['nodes']['by_node_id'][$node_id];
+			$vars = array(
+				$var_prefix.'tree_id' => $tree_id,
+				$var_prefix.'node_id' => (isset($node['node_id'])) ? $node['node_id'] : '',
+				$var_prefix.'parent_node_id' => (isset($node['parent'])) ? $node['parent'] : '',
+				$var_prefix.'node_lft' => (isset($node['lft'])) ? $node['lft'] : '',
+				$var_prefix.'node_rgt' => (isset($node['rgt'])) ? $node['rgt'] : '',
+				$var_prefix.'node_label' => (isset($node['label'])) ? $node['label'] : '',
+				$var_prefix.'node_entry_id' => (isset($node['entry_id'])) ? $node['entry_id'] : '',
+				$var_prefix.'node_template_id' => (isset($node['template_path'])) ? $node['template_path'] : '',
+				$var_prefix.'node_field_data' => (isset($node['field_data'])) ? $node['field_data'] : '',
+				$var_prefix.'node_status' => (isset($node['status'])) ? $node['status'] : '',
+				$var_prefix.'node_highlight' => (isset($node['highlight'])) ? $node['highlight'] : '',
+				$var_prefix.'node_title' => (isset($node['title'])) ? $node['title'] : '',
+				$var_prefix.'node_url_title' => (isset($node['url_title'])) ? $node['url_title'] : '',
+				$var_prefix.'node_entry_date' => (isset($node['entry_date'])) ? $node['entry_date'] : '',
+				$var_prefix.'node_template_id' => (isset($node['template_id'])) ? $node['template_id'] : '',
+				$var_prefix.'node_template_group_id' => (isset($node['group_id'])) ? $node['group_id'] : '',
+				$var_prefix.'node_template_name' => (isset($node['template_name'])) ? $node['template_name'] : '',
+				$var_prefix.'node_template_group_name' => (isset($node['group_name'])) ? $node['group_name'] : '',
+				$var_prefix.'node_template_is_site_default' => (isset($node['is_site_default'])) ? $node['is_site_default'] : '',
+				$var_prefix.'node_level' => (isset($node['depth'])) ? $node['depth'] : '',
+				$var_prefix.'node_level+1' => (isset($node['depth'])) ? $node['depth']+1 : '',
+				$var_prefix.'node_level+2' => (isset($node['depth'])) ? $node['depth']+2 : '',
+				$var_prefix.'node_level-1' => (isset($node['depth'])) ? $node['depth']-1 : '',
+				$var_prefix.'node_level-2' => (isset($node['depth'])) ? $node['depth']-2 : '',
+				$var_prefix.'node_has_children' => (isset($node['has_children'])) ? $node['has_children'] : '',
+				$var_prefix.'node_url' => (isset($node['url'])) ? $node['url'] : ''
+			);
+
+			$parent = (isset($this->cache['trees'][$tree_id]['nodes']['by_node_id'][ $node['parent'] ])) 
+						? $this->cache['trees'][$tree_id]['nodes']['by_node_id'][ $node['parent'] ] : '';
+
+			$vars += array(
+				$var_prefix.'parent_node_id' => (isset($parent['node_id'])) ? $parent['node_id'] : '',
+				$var_prefix.'parent_parent_node_id' => (isset($parent['parent'])) ? $parent['parent'] : '',
+				$var_prefix.'parent_node_lft' => (isset($parent['lft'])) ? $parent['lft'] : '',
+				$var_prefix.'parent_node_rgt' => (isset($parent['rgt'])) ? $parent['rgt'] : '',
+				$var_prefix.'parent_node_label' => (isset($parent['label'])) ? $parent['label'] : '',
+				$var_prefix.'parent_node_entry_id' => (isset($parent['entry_id'])) ? $parent['entry_id'] : '',
+				$var_prefix.'parent_node_template_id' => (isset($parent['template_path'])) ? $parent['template_path'] : '',
+				$var_prefix.'parent_node_field_data' => (isset($parent['field_data'])) ? $parent['field_data'] : '',
+				$var_prefix.'parent_node_status' => (isset($parent['status'])) ? $parent['status'] : '',
+				$var_prefix.'parent_node_highlight' => (isset($parent['highlight'])) ? $parent['highlight'] : '',
+				$var_prefix.'parent_node_title' => (isset($parent['title'])) ? $parent['title'] : '',
+				$var_prefix.'parent_node_url_title' => (isset($parent['url_title'])) ? $parent['url_title'] : '',
+				$var_prefix.'parent_node_entry_date' => (isset($parent['entry_date'])) ? $parent['entry_date'] : '',
+				$var_prefix.'parent_node_template_id' => (isset($parent['template_id'])) ? $parent['template_id'] : '',
+				$var_prefix.'parent_node_group_id' => (isset($parent['group_id'])) ? $parent['group_id'] : '',
+				$var_prefix.'parent_node_template_name' => (isset($parent['template_name'])) ? $parent['template_name'] : '',
+				$var_prefix.'parent_node_template_group_name' => (isset($parent['group_name'])) ? $parent['group_name'] : '',
+				$var_prefix.'parent_node_template_is_site_default' => (isset($parent['is_site_default'])) ? $parent['is_site_default'] : '',
+				$var_prefix.'parent_node_level' => (isset($parent['depth'])) ? $parent['depth'] : '',
+				$var_prefix.'parent_node_level+1' => (isset($parent['depth'])) ? $parent['depth']+1 : '',
+				$var_prefix.'parent_node_level+2' => (isset($parent['depth'])) ? $parent['depth']+2 : '',
+				$var_prefix.'parent_node_level-1' => (isset($parent['depth'])) ? $parent['depth']-1 : '',
+				$var_prefix.'parent_node_level-2' => (isset($parent['depth'])) ? $parent['depth']-2 : '',
+				$var_prefix.'parent_node_has_children' => 1, // duh
+				$var_prefix.'parent_node_url' => (isset($parent['url'])) ? $parent['url'] : ''
+			);
+
+			$tagdata = ee()->TMPL->tagdata;
+
+			if($tagdata)
+			{
+				return ee()->TMPL->parse_variables_row($tagdata, $vars);
+			}
+
+			if($add_globals == 'yes')
+			{
+				ee()->config->_global_vars = array_merge($vars, ee()->config->_global_vars);
+			}
+
+		}	
+
+	}
 
 
+	// --------------------------------------------------------------------
 
 
-	// ---------------------------------------------------------------
 	/**
 	 * _build_nav
 	 *
@@ -362,7 +842,7 @@ class Taxonomy extends Taxonomy_base {
 	private function _build_nav($tagdata, $taxonomy, $params)
 	{
 		
-		$tree_id = $this->EE->taxonomy->tree_id;
+		$tree_id = ee()->taxonomy->tree_id;
 
 		// filter out nodes we don't want from this level
 		$taxonomy = $this->_pre_process_level($taxonomy, $params);
@@ -466,13 +946,13 @@ class Taxonomy extends Taxonomy_base {
     		// have we got children, go through this method recursively
     		if((isset($node['children'])))
     		{	
-    			$this->EE->TMPL->log_item("TAXONOMY:NAV: processing child nodes");
+    			ee()->TMPL->log_item("TAXONOMY:NAV: processing child nodes");
     			$vars['children'] = $this->_build_nav($tagdata, $node['children'], $params);
     		}
     		
     		// swappy swappy
-    		$tmp = $this->EE->functions->prep_conditionals($tagdata, $vars);
-    		$str .= $this->EE->functions->var_swap($tmp, $vars);
+    		$tmp = ee()->functions->prep_conditionals($tagdata, $vars);
+    		$str .= ee()->functions->var_swap($tmp, $vars);
 
     		// close out our list
     		if($level_count == $level_total_count+1 && $params['include_ul'] == 'yes' && $params['style'] == 'nested') 
@@ -496,9 +976,9 @@ class Taxonomy extends Taxonomy_base {
 	{
 		foreach($tree as $key => $node)
     	{
-    		if(isset($this->cache['trees'][$this->EE->taxonomy->tree_id]['nodes']['by_node_id'][ $node['id'] ]))
+    		if(isset($this->cache['trees'][ee()->taxonomy->tree_id]['nodes']['by_node_id'][ $node['id'] ]))
     		{
-    			$att = $this->cache['trees'][$this->EE->taxonomy->tree_id]['nodes']['by_node_id'][ $node['id'] ];
+    			$att = $this->cache['trees'][ee()->taxonomy->tree_id]['nodes']['by_node_id'][ $node['id'] ];
 	    		foreach($params['parents'] as $parent)
 				{
 					if($node['id'] == $parent)
@@ -530,7 +1010,7 @@ class Taxonomy extends Taxonomy_base {
 	// filter for status, entry_date, expiration date etc
 	private function _pre_process_level($taxonomy, $params)
 	{
-		$tree_id = $this->EE->taxonomy->tree_id;
+		$tree_id = ee()->taxonomy->tree_id;
 
 		if(!isset($this->cache['first_pass'])) $this->cache['first_pass'] = 1;
 
@@ -664,160 +1144,9 @@ class Taxonomy extends Taxonomy_base {
 
     	}
 
-
-
 		return $taxonomy;
 	}
 
-
-
-
-	// ----------------------------------------------------------------	
-	
-	/**
-     * The the url for a node from tree_id + (entry_id or node_id)
-	 */	
-	function node_url()
-	{
-		
-		$tree_id 		= $this->_get_this('tree_id');
-		$entry_id 		= $this->_get_this('entry_id');
-		$node_id 		= $this->_get_this('node_id');
-		$use_relative 	= $this->get_param('use_relative', FALSE);
-
-		if(!$tree_id || (!$node_id && !$entry_id))
-			return '';
-
-		$this->EE->load->model('taxonomy_model');
-
-		if( $this->EE->taxonomy->set_table( $tree_id ) === FALSE )
-		{
-			$this->EE->TMPL->log_item("TAXONOMY:NAV: Returning NULL; Tree requested does not exist.");
-			return '';
-		} 
-
-		$this->EE->taxonomy->get_nodes();
-		$node_cache = (isset($this->cache['trees'][$tree_id]['nodes'])) ? $this->cache['trees'][$tree_id]['nodes'] : '';
-
-		// via entry_id
-		if($entry_id && isset($node_cache['by_entry_id'][$entry_id]))
-		{
-			$node_id = $node_cache['by_entry_id'][$entry_id];
-		}
-
-		if($node_id && isset($node_cache['by_node_id'][$node_id]['url']))
-		{
-			
-			if($use_relative) // bleh
-			{
-				return str_replace($this->site_url, '', $node_cache['by_node_id'][$node_id]['url']);
-			}
-			else
-			{
-				return $node_cache['by_node_id'][$node_id]['url'];
-			}
-			
-		}
-
-	}
-
-
-	// ----------------------------------------------------------------
-	
-	
-	/**
-	 * Generates a breadcrumb trail from the current node with a specified entry_id/node_id
-	 */
-	function breadcrumbs()
-	{
-		
-		$tree_id 		= $this->_get_this('tree_id');
-		$entry_id 		= $this->_get_this('entry_id');
-		$node_id 		= $this->_get_this('node_id');
-
-		if(!$tree_id || (!$node_id && !$entry_id))
-			return NULL;
-
-		$this->EE->load->model('nested_set_model');
-		$this->EE->load->model('taxonomy_model');
-		$tmpl = $this->EE->TMPL;
-		$tagdata = $tmpl->tagdata;
-		$nested_set = $this->EE->nested_set_model;
-		$taxonomy   = $this->EE->taxonomy_model;
-		$nested_set->set_table( $tree_id );
-
-		$wrap_li 		= ($tmpl->fetch_param('wrap_li') == 'yes') ? TRUE : FALSE;
-		$display_root 	= $tmpl->fetch_param('display_root');
-		$delimiter 		= $this->get_param('delimiter', ' &rarr; ');
-		$include_here 	= $this->get_param('include_here');
-		$titles_only 	= $this->get_param('titles_only');
-		$reverse 		= $this->get_param('reverse');
-		$title_field 	= $this->get_param('title_field', 'node_title');
-
-		$this->return_data = $here = '';
-		$depth = 0;	
-
-		if($entry_id)
-			$here = $nested_set->get_node_by_id( $entry_id, 'entry_id' );
-		elseif($node_id)
-			$here = $nested_set->get_node_by_id( $node_id, 'node_id' );
-
-// Get the path to here.
-// --------------------------------------------------
-		$path = $nested_set->get_parents_crumbs($here['lft'],$here['rgt']);
-
-		// no path, no here, bail out.
-		if(!$here || !$path)
-		{
-			// cheers @monooso - http://experienceinternet.co.uk/blog/ee-gotchas-nested-no-results-tags/
-			$tag_name = 'no_breadcrumb_results';
-			$pattern = '#' .LD .'if ' .$tag_name .RD .'(.*?)' .LD .'/if' .RD .'#s';
-
-			if (is_string($tagdata) && is_string($tag_name) && preg_match($pattern, $tagdata, $matches))
-			{
-				return $matches[1];
-			}
-
-		}
-
-// Folks use this for title trails, reversed breadcrumbs
-// --------------------------------------------------
-		if($reverse == 'yes')
-		{
-			if($display_root == "no" && isset($path[0]))
-				unset($path[0]);
-				
-			$path = array_reverse($path);
-			
-			if($include_here != "no")
-			{
-				$return_data .= $here['label'].' '.$delimiter;
-			}
-		}
-
-// Loop through each crumb
-// --------------------------------------------------
-		foreach($path as &$crumb)
-		{
-			// use a custom field for node_title
-			if($title_field != 'node_title')
-			{
-				$custom_fields = $this->unserialize($crumb['field_data']);
-			}
-
-			$crumb['node_label'] = ( isset($custom_fields[$title_field]) ) ? $custom_fields[$title_field] : $crumb['label'];
-			$crumb['node_url'] = $taxonomy->build_node_url($crumb);
-			$crumb['node_count'] = ++$depth;
-			$crumb['total_nodes'] = count($path);
-			$crumb['no_breadcrumb_results'] = 0;
-		}
-
-		$tagdata = $this->EE->functions->prep_conditionals($tagdata, $path);
-
-		return $this->EE->TMPL->parse_variables($tagdata, $path);
-		
-	}
-	
 	// ----------------------------------------------------------------
 
 	/**

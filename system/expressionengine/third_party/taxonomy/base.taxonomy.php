@@ -2,6 +2,16 @@
 
 // ------------------------------------------------------------------------
 
+if( !function_exists('ee') )
+{
+	function ee()
+	{
+		static $EE;
+		if ( ! $EE) $EE = get_instance();
+		return $EE;
+	}
+}
+
 /**
  * Taxonomy Base Class
  *
@@ -130,6 +140,8 @@ class Taxonomy_base
 	// METHODS
 	// --------------------------------------------------------------------
 
+	
+
 	/**
 	 * Constructor
 	 *
@@ -138,34 +150,32 @@ class Taxonomy_base
 	 */
 	public function __construct()
 	{
-
-		$this->EE =& get_instance();
 		
-		$this->EE->load->helper('url');
+		ee()->load->helper('url');
 
-		$this->site_id = $this->EE->config->item('site_id');
-		$this->site_url = $this->EE->functions->fetch_site_index();
+		$this->site_id = ee()->config->item('site_id');
+		$this->site_url = ee()->functions->fetch_site_index();
 
-		if (! isset($this->EE->session->cache['taxonomy']))
+		if (! isset(ee()->session->cache['taxonomy']))
 		{
-			$this->EE->session->cache['taxonomy'] = array();
+			ee()->session->cache['taxonomy'] = array();
 		}
 		
-		$this->cache =& $this->EE->session->cache['taxonomy'];
+		$this->cache =& ee()->session->cache['taxonomy'];
 
 		
 		// are we in the cp?
-		if( $this->EE->input->get('D') == 'cp' )
+		if( ee()->input->get('D') == 'cp' )
 		{
-			$this->EE->load->library('table');
+			ee()->load->library('table');
 			$this->form_base_url 	= 'C=addons_modules'.AMP.'M=show_module_cp'.AMP.'module='.TAXONOMY_SHORT_NAME;
 			$this->base_url		= BASE.AMP.$this->form_base_url;
-			$this->theme_base_url 	= $this->EE->config->item('theme_folder_url').'third_party/taxonomy_assets/';
+			$this->theme_base_url 	= ee()->config->item('theme_folder_url').'third_party/taxonomy_assets/';
 
 			// add our cp js/css
 			if( ! isset($this->cache['taxonomy_assets_added']) )
 			{
-				$this->EE->cp->add_to_head('
+				ee()->cp->add_to_head('
 					<link rel="stylesheet" type="text/css" href="'.$this->theme_base_url.'css/taxonomy.css?v'.TAXONOMY_VERSION.'" />
 				');
 
@@ -184,7 +194,7 @@ class Taxonomy_base
 	 */		 
 	function get_param($key, $default_value = '')
 	{
-		$val = $this->EE->TMPL->fetch_param($key);
+		$val = ee()->TMPL->fetch_param($key);
 		
 		if($val == '') 
 			return $default_value;
@@ -196,7 +206,7 @@ class Taxonomy_base
 
 	function is_ajax_request()
 	{
-		if ($this->EE->input->server('HTTP_X_REQUESTED_WITH') === 'XMLHttpRequest')
+		if (ee()->input->server('HTTP_X_REQUESTED_WITH') === 'XMLHttpRequest')
 		{
 			return TRUE;
 		}

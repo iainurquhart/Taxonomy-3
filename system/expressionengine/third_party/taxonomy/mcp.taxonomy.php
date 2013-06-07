@@ -41,7 +41,7 @@ class Taxonomy_mcp extends Taxonomy_base {
 	function __construct() 
 	{
 		parent::__construct();
-		$this->EE->load->model('taxonomy_model', 'taxonomy');
+		ee()->load->model('taxonomy_model', 'taxonomy');
 	}
 	
 	// ----------------------------------------------------------------
@@ -56,7 +56,7 @@ class Taxonomy_mcp extends Taxonomy_base {
 		$vars = array();
 		$vars['trees'] = array();
 	
-		$trees = $this->EE->taxonomy->get_trees();
+		$trees = ee()->taxonomy->get_trees();
 
 		// do we haz trees?
 		if( ! $trees )
@@ -69,7 +69,7 @@ class Taxonomy_mcp extends Taxonomy_base {
 			$vars['trees'][$key] = $tree;
 			$vars['trees'][$key]['edit_tree_link'] 	 = anchor( $this->base_url.AMP.'method=edit_tree'.AMP.'tree_id='.$tree['id'], lang('tx_edit_tree_settings') );
 			$vars['trees'][$key]['edit_nodes_link']  = anchor( $this->base_url.AMP.'method=edit_nodes'.AMP.'tree_id='.$tree['id'], $tree['label'] );
-			$vars['trees'][$key]['delete_tree_link'] = anchor( $this->base_url.AMP.'method=delete_tree'.AMP.'tree_id='.$tree['id'], '<img src="'.$this->EE->cp->cp_theme_url.'images/icon-delete.png" />' );
+			$vars['trees'][$key]['delete_tree_link'] = anchor( $this->base_url.AMP.'method=delete_tree'.AMP.'tree_id='.$tree['id'], '<img src="'.ee()->cp->cp_theme_url.'images/icon-delete.png" />' );
 		}
 
 		return $this->_content_wrapper('index', 'tx_manage_trees', $vars);	
@@ -88,14 +88,14 @@ class Taxonomy_mcp extends Taxonomy_base {
 		$vars = array();
 		$vars['tree'] = '';
 
-		$tree_id = $this->EE->input->get('tree_id');
-		$this->EE->taxonomy->set_table( $tree_id );
+		$tree_id = ee()->input->get('tree_id');
+		ee()->taxonomy->set_table( $tree_id );
 
 		// editing an existing tree
 		if($tree_id)
 		{
 			// get our settings
-			$vars['tree'] = $this->EE->taxonomy->get_tree();
+			$vars['tree'] = ee()->taxonomy->get_tree();
 			if($vars['tree']['fields'] != '')
 			{
 				$vars['tree']['fields'] = json_decode($vars['tree']['fields'], TRUE);
@@ -105,12 +105,12 @@ class Taxonomy_mcp extends Taxonomy_base {
 		}
 		else
 		{
-			$this->EE->cp->add_js_script(
+			ee()->cp->add_js_script(
 				array(
 					'plugin' => array('ee_url_title')
 				)
 			);
-			$this->EE->cp->add_to_head('
+			ee()->cp->add_to_head('
 				<script type="text/javascript" charset="utf-8">
 				// <![CDATA[
 					$(document).ready(function() {
@@ -123,7 +123,7 @@ class Taxonomy_mcp extends Taxonomy_base {
 			');
 		}
 
-		$this->EE->cp->add_js_script(
+		ee()->cp->add_js_script(
 			array(
 				'ui' => array(
 					'core', 'widget', 'mouse', 'sortable'
@@ -131,8 +131,8 @@ class Taxonomy_mcp extends Taxonomy_base {
 			)
 		); 
 
-		$this->EE->cp->load_package_js('jquery.roland'); 
-		$this->EE->javascript->compile();
+		ee()->cp->load_package_js('jquery.roland'); 
+		ee()->javascript->compile();
 
 		// misc assets/classes required
 		$vars['drag_handle'] = '&nbsp;';
@@ -144,12 +144,12 @@ class Taxonomy_mcp extends Taxonomy_base {
 		);
 		
 		// load up our various tree options (channels, templates, etc)
-		$vars['tree_options'] = $this->EE->taxonomy->get_tree_options();
+		$vars['tree_options'] = ee()->taxonomy->get_tree_options();
 
 		$vars['tree_options']['templates']['by_group'] = (isset($vars['tree_options']['templates']['by_group'])) ? $vars['tree_options']['templates']['by_group'] : array();
 
 		// adding a new tree
-		if($this->EE->input->get('new'))
+		if(ee()->input->get('new'))
 		{
 			$vars['tree'] = $this->tree_settings;
 		}
@@ -168,7 +168,7 @@ class Taxonomy_mcp extends Taxonomy_base {
 	public function update_tree()
 	{
 
-		$data = $this->EE->input->post('tree');
+		$data = ee()->input->post('tree');
 
 		$data['templates'] 		= (isset($data['templates'])) ? implode('|', $data['templates']) : '';
 		$data['channels'] 		= (isset($data['channels'])) ? implode('|', $data['channels']) : '';
@@ -176,7 +176,7 @@ class Taxonomy_mcp extends Taxonomy_base {
 		$data['site_id'] = $this->site_id;
 		$data['fields'] = '';
 
-		$fields = $this->EE->input->post('fields');
+		$fields = ee()->input->post('fields');
 		
 		if(is_array($fields))
 		{
@@ -194,14 +194,14 @@ class Taxonomy_mcp extends Taxonomy_base {
 			
 		}
 
-		$tree_id = $this->EE->taxonomy->update_tree( $data );
+		$tree_id = ee()->taxonomy->update_tree( $data );
 
-		$ret = ($this->EE->input->post('update_and_return')) ? 
+		$ret = (ee()->input->post('update_and_return')) ? 
 			$this->base_url : 
 				$this->base_url.AMP.'method=edit_tree'.AMP.'tree_id='.$tree_id;
 
-		$this->EE->session->set_flashdata('message_success', lang('tx_tree_updated'));
-		$this->EE->functions->redirect($ret);
+		ee()->session->set_flashdata('message_success', lang('tx_tree_updated'));
+		ee()->functions->redirect($ret);
 
 	}
 
@@ -215,19 +215,19 @@ class Taxonomy_mcp extends Taxonomy_base {
 	public function delete_tree()
 	{
 		
-		$this->EE->taxonomy->set_table( $this->EE->input->get('tree_id') );
+		ee()->taxonomy->set_table( ee()->input->get('tree_id') );
 		
 		// @todo add confirmation of delete
-		$this->EE->db->where('id', $this->EE->taxonomy->tree_id);
-		$this->EE->db->delete('taxonomy_trees');
+		ee()->db->where('id', ee()->taxonomy->tree_id);
+		ee()->db->delete('taxonomy_trees');
 		
 		// thanks codeigniter for wasting my morning, seems if you add a db prefix to
 		// the drop_table command it's just ignored...
-		$this->EE->load->dbforge();
-		$this->EE->dbforge->drop_table( 'taxonomy_tree_'.$this->EE->taxonomy->tree_id );
+		ee()->load->dbforge();
+		ee()->dbforge->drop_table( 'taxonomy_tree_'.ee()->taxonomy->tree_id );
 
-		$this->EE->session->set_flashdata('message_success', lang('tx_tree_deleted'));
-		$this->EE->functions->redirect($this->base_url);
+		ee()->session->set_flashdata('message_success', lang('tx_tree_deleted'));
+		ee()->functions->redirect($this->base_url);
 	}
 
 	// ----------------------------------------------------------------
@@ -241,18 +241,18 @@ class Taxonomy_mcp extends Taxonomy_base {
 	{
 		$vars = array();
 
-		$this->EE->taxonomy->set_table( $this->EE->input->get('tree_id') );
+		ee()->taxonomy->set_table( ee()->input->get('tree_id') );
 
 		// @todo validate permissions
 
-		$vars['tree'] = $this->EE->taxonomy->get_tree();
+		$vars['tree'] = ee()->taxonomy->get_tree();
 
 		// have we got a taxonomy? 
 		// if not bail here and prompt to insert a root node first.
 		if( $vars['tree']['taxonomy'] == '')
 		{	
-			$ret = $this->base_url.AMP.'method=manage_node'.AMP.'tree_id='.$this->EE->taxonomy->tree_id.AMP.'add_root=1';
-			$this->EE->functions->redirect($ret);
+			$ret = $this->base_url.AMP.'method=manage_node'.AMP.'tree_id='.ee()->taxonomy->tree_id.AMP.'add_root=1';
+			ee()->functions->redirect($ret);
 		}
 		else
 		{
@@ -260,7 +260,7 @@ class Taxonomy_mcp extends Taxonomy_base {
 		}
 
 		// add our required js
-		$this->EE->cp->add_js_script(
+		ee()->cp->add_js_script(
 			array(
 				'ui' => array(
 					'core', 'widget', 'mouse', 'sortable'
@@ -268,10 +268,10 @@ class Taxonomy_mcp extends Taxonomy_base {
 			)
 		); 
 
-		$this->EE->cp->load_package_js('jquery.mjs.nestedSortable'); 
-		$this->EE->javascript->compile();
+		ee()->cp->load_package_js('jquery.mjs.nestedSortable'); 
+		ee()->javascript->compile();
 
-		$vars['nodes'] = $this->EE->taxonomy->get_nodes();
+		$vars['nodes'] = ee()->taxonomy->get_nodes();
 
 		$vars['cp_list'] = $this->_build_cp_list( 
 			$vars['nodes']['by_node_id'], 
@@ -291,16 +291,16 @@ class Taxonomy_mcp extends Taxonomy_base {
 	public function manage_node()
 	{
 		$vars = array();
-		$this->EE->taxonomy->set_table( $this->EE->input->get('tree_id') );
+		ee()->taxonomy->set_table( ee()->input->get('tree_id') );
 
-		$vars['tree'] = $this->EE->taxonomy->get_tree();
-		$vars['node_id'] = $this->EE->input->get('node_id');
+		$vars['tree'] = ee()->taxonomy->get_tree();
+		$vars['node_id'] = ee()->input->get('node_id');
 		$vars['templates'] = array();
 		$vars['channel_entries'] = array();
 		$vars['template_options'] = array();
 		$vars['root_insert'] = FALSE;
-		$vars['nodes'] = $this->EE->taxonomy->get_flat_tree();
-		$vars['this_node'] = $this->EE->taxonomy->get_node_by_id( $vars['node_id'] );
+		$vars['nodes'] = ee()->taxonomy->get_flat_tree();
+		$vars['this_node'] = ee()->taxonomy->get_node_by_id( $vars['node_id'] );
 
 		if(isset($vars['this_node']['field_data']) 
 			&& $vars['this_node']['field_data'] != ''
@@ -313,7 +313,7 @@ class Taxonomy_mcp extends Taxonomy_base {
 		// fetch options for selects
 		if($vars['tree']['templates'] != '')
 		{
-			$vars['all_templates'] = $this->EE->taxonomy->get_templates($this->site_id);
+			$vars['all_templates'] = ee()->taxonomy->get_templates($this->site_id);
 			
 			foreach($vars['tree']['templates'] as $template)
 			{
@@ -330,8 +330,8 @@ class Taxonomy_mcp extends Taxonomy_base {
 		// fetch entries for select
 		if($vars['tree']['channels'] != '')
 		{
-			$channels = $this->EE->taxonomy->get_channels();
-			$channel_entries = $this->EE->taxonomy->get_entries( $vars['tree']['channels'] );
+			$channels = ee()->taxonomy->get_channels();
+			$channel_entries = ee()->taxonomy->get_entries( $vars['tree']['channels'] );
 
 			if( count($channel_entries) )
 			{
@@ -344,10 +344,10 @@ class Taxonomy_mcp extends Taxonomy_base {
 			}
 		}
 
-		$this->EE->cp->load_package_js('jquery.chosen.min'); 
-		$this->EE->javascript->compile();
+		ee()->cp->load_package_js('jquery.chosen.min'); 
+		ee()->javascript->compile();
 
-		if( $this->EE->input->get('add_root') == 1 )
+		if( ee()->input->get('add_root') == 1 )
 		{	
 			$vars['root_insert'] = TRUE;
 			$lang_key = 'tx_add_root_node';
@@ -355,7 +355,7 @@ class Taxonomy_mcp extends Taxonomy_base {
 		else
 			$lang_key = 'tx_manage_node';
 
-		$vars['already_selected_entries'] = $this->cache['trees'][$this->EE->input->get('tree_id')]['nodes']['by_entry_id'];
+		$vars['already_selected_entries'] = $this->cache['trees'][ee()->input->get('tree_id')]['nodes']['by_entry_id'];
 
 		if($vars['tree']['fields'] != '' && !is_array($vars['tree']['fields']))
 		{
@@ -375,16 +375,16 @@ class Taxonomy_mcp extends Taxonomy_base {
 	public function update_node()
 	{
 		
-		$node = (array) $this->EE->input->post('node');
+		$node = (array) ee()->input->post('node');
 
 		if(!isset($node['type']))
 		{
 			$node['type'] = array();
 		}
 
-		$this->EE->taxonomy->set_table( $node['tree_id'] );
+		ee()->taxonomy->set_table( $node['tree_id'] );
 
-		$tree = $this->EE->taxonomy->get_tree();
+		$tree = ee()->taxonomy->get_tree();
 
 		// @todo validate tree
 
@@ -396,34 +396,35 @@ class Taxonomy_mcp extends Taxonomy_base {
 		// do we have a parent? get parent info
 		if( isset($node['parent_lft']))
 		{
-			$parent = $this->EE->taxonomy->get_node( $node['parent_lft'] );
+			$parent = ee()->taxonomy->get_node( $node['parent_lft'] );
 			$node['parent'] = $parent['node_id'];
+			$node['depth'] = $parent['depth']+1;
 		}
 
 		// are we editing an existing node?
 		if( isset($node['node_id']) && $node['node_id'] != '' )
 		{
-			$this->EE->taxonomy->update_node( $node['node_id'], $node );
+			ee()->taxonomy->update_node( $node['node_id'], $node );
 			$msg = lang('tx_node_updated');
 		}
 		// are we inserting a root?
 		elseif( isset($node['is_root']) && $node['is_root'] == 1 )
 		{
-			$this->EE->taxonomy->insert_root( $node );
+			ee()->taxonomy->insert_root( $node );
 			$msg = lang('tx_root_inserted');
 		}
 		// must be inserting a new node
 		else
 		{
-			$this->EE->taxonomy->append_node_last( $node['parent_lft'], $node );
+			ee()->taxonomy->append_node_last( $node['parent_lft'], $node );
 			$msg = lang('tx_node_added');
 		}
 
-		$tree_array = json_encode( $this->EE->taxonomy->get_tree_taxonomy() );
-		$this->EE->taxonomy->update_taxonomy( $tree_array );
+		$tree_array = json_encode( ee()->taxonomy->get_tree_taxonomy() );
+		ee()->taxonomy->update_taxonomy( $tree_array );
 
-		$this->EE->session->set_flashdata('message_success', $msg);
-		$this->EE->functions->redirect( $this->base_url.AMP.'method=edit_nodes'.AMP.'tree_id='.$node['tree_id'] );
+		ee()->session->set_flashdata('message_success', $msg);
+		ee()->functions->redirect( $this->base_url.AMP.'method=edit_nodes'.AMP.'tree_id='.$node['tree_id'] );
 
 
 	}
@@ -438,33 +439,33 @@ class Taxonomy_mcp extends Taxonomy_base {
 	public function reorder_nodes()
 	{
 
-		$this->EE->taxonomy->set_table( $this->EE->input->get_post('tree_id') );
+		ee()->taxonomy->set_table( ee()->input->get_post('tree_id') );
 
-		$last_updated_token = $this->EE->input->get_post('last_updated');
-		$taxonomy_data 		= json_decode($this->EE->input->get_post('taxonomy_order'), TRUE);
-		$tree_settings 		= $this->EE->taxonomy->get_tree(TRUE);
+		$last_updated_token = ee()->input->get_post('last_updated');
+		$taxonomy_data 		= json_decode(ee()->input->get_post('taxonomy_order'), TRUE);
+		$tree_settings 		= ee()->taxonomy->get_tree(TRUE);
 
 		// Our tree has been edited since this tree order was sent.
 		// bail out of the whole operation.
 		if( $last_updated_token != $tree_settings['last_updated'])
 		{
 			$resp['data'] = 'last_update_mismatch';	
-			$this->EE->output->send_ajax_response($resp);
+			ee()->output->send_ajax_response($resp);
 		}
 
-		$this->EE->taxonomy->reorder_nodes($taxonomy_data);
+		ee()->taxonomy->reorder_nodes($taxonomy_data);
 
-		$tree_array = json_encode( $this->EE->taxonomy->get_tree_taxonomy() );
-		$this->EE->taxonomy->update_taxonomy( $tree_array );
+		$tree_array = json_encode( ee()->taxonomy->get_tree_taxonomy() );
+		ee()->taxonomy->update_taxonomy( $tree_array );
 
 		// lets just be sure of timestamps and get the tree settings again.
 		unset($tree_settings);
-		$tree_settings =  $this->EE->taxonomy->get_tree( TRUE );
+		$tree_settings =  ee()->taxonomy->get_tree( TRUE );
 
 		$resp['data'] = 'Node order updated';
 		$resp['last_updated'] = $tree_settings['last_updated'];
 
-		$this->EE->output->send_ajax_response( $resp );
+		ee()->output->send_ajax_response( $resp );
 	}
 
 	// ----------------------------------------------------------------
@@ -476,19 +477,19 @@ class Taxonomy_mcp extends Taxonomy_base {
 	 */
 	function delete_node()
 	{
-		$tree_id = $this->EE->input->get_post('tree_id');
-		$this->EE->taxonomy->set_table( $tree_id );
+		$tree_id = ee()->input->get_post('tree_id');
+		ee()->taxonomy->set_table( $tree_id );
 
-		$type = ($this->EE->input->get_post('type')) ? 'delete_branch' : 'delete_node';
+		$type = (ee()->input->get_post('type')) ? 'delete_branch' : 'delete_node';
 		
-		$node = $this->EE->taxonomy->get_node( $this->EE->input->get_post('node_id'), 'node_id' );
-		$this->EE->taxonomy->{$type}( $node['lft'] );
+		$node = ee()->taxonomy->get_node( ee()->input->get_post('node_id'), 'node_id' );
+		ee()->taxonomy->{$type}( $node['lft'] );
 
-		$tree_array = json_encode( $this->EE->taxonomy->get_tree_taxonomy() );
-		$this->EE->taxonomy->update_taxonomy( $tree_array );
+		$tree_array = json_encode( ee()->taxonomy->get_tree_taxonomy() );
+		ee()->taxonomy->update_taxonomy( $tree_array );
 
-		$this->EE->session->set_flashdata('message_success', $this->EE->lang->line('node_deleted'));
-		$this->EE->functions->redirect($this->base_url.AMP.'method=edit_nodes'.AMP.'tree_id='.$tree_id);
+		ee()->session->set_flashdata('message_success', ee()->lang->line('node_deleted'));
+		ee()->functions->redirect($this->base_url.AMP.'method=edit_nodes'.AMP.'tree_id='.$tree_id);
 	}
 
 
@@ -514,7 +515,7 @@ class Taxonomy_mcp extends Taxonomy_base {
     	
     	foreach($tree as $node)
     	{
-    		$tree_id 			= (int) $this->EE->input->get('tree_id');
+    		$tree_id 			= (int) ee()->input->get('tree_id');
     		$node_id			= $node['id'];
     		
     		$url_title 			= '/'.$nodes[$node_id]['url_title'];
@@ -524,12 +525,12 @@ class Taxonomy_mcp extends Taxonomy_base {
     		$highlight			= $nodes[$node_id]['highlight'];
     		$status_text		= ($nodes[$node_id]['status'] && $nodes[$node_id]['status'] != 'open') ? ' + '.ucfirst($nodes[$node_id]['status']) : '';
     		$status				= ($nodes[$node_id]['status'] && $nodes[$node_id]['status'] != 'open') ? '<em class="status_indicator" title="'.ucfirst($nodes[$node_id]['status']).'" style="background-color: #'.$highlight.'">['.ucfirst($nodes[$node_id]['status']).']</em>' : '';
-    		$site_url			= $this->EE->functions->fetch_site_index();
+    		$site_url			= ee()->functions->fetch_site_index();
     		$level 				= $node['level'];
     		
     		$expiration_date 	= (isset($nodes[$node_id]['expiration_date'])) ? $nodes[$node_id]['expiration_date'] : 0;
     		$entry_date 		= (isset($nodes[$node_id]['entry_date'])) ? $nodes[$node_id]['entry_date'] : 0;
-    		$now 				= $this->EE->localize->now;
+    		$now 				= ee()->localize->now;
     		$date_indicator 	= '';
     		
     		if($entry_date > $now && $entry_date != 0)
@@ -571,7 +572,7 @@ class Taxonomy_mcp extends Taxonomy_base {
         	$str .= $ind."		<div class='item-options'> \n";
         	
         	// show the node_id for superadmins
-        	if($this->EE->session->userdata['group_id'] == 1)
+        	if(ee()->session->userdata['group_id'] == 1)
         	{
         		$str .= $ind."			<span class='node-info' title='<em>Node ID:</em> <strong>$node_id</strong>";
         		$str .= ($nodes[$node_id]['entry_id']) ? " &nbsp; &nbsp; <em>Node Entry ID:</em> <strong>".$nodes[$node_id]['entry_id']."</strong>" : '';
@@ -632,7 +633,7 @@ class Taxonomy_mcp extends Taxonomy_base {
 			'tx_add_tree' => $this->base_url.AMP.'method=edit_tree'.AMP.'new=1'
 		);
 
-		$this->EE->cp->set_right_nav($nav);
+		ee()->cp->set_right_nav($nav);
 		
 		$vars['content_view'] 	= $content_view;
 		$vars['base_url'] 		= $this->base_url;
@@ -642,17 +643,17 @@ class Taxonomy_mcp extends Taxonomy_base {
 
 		$cp_page_title = lang($lang_key);
 
-		$this->EE->cp->set_variable( 'cp_page_title', $cp_page_title );
-		$this->EE->cp->set_breadcrumb( $this->base_url, TAXONOMY_NAME );
+		ee()->cp->set_variable( 'cp_page_title', $cp_page_title );
+		ee()->cp->set_breadcrumb( $this->base_url, TAXONOMY_NAME );
 
 		if( $this->is_ajax_request() )
 		{
 			$vars['include_title'] = TRUE;
-			$this->EE->output->send_ajax_response( $this->EE->load->view( $content_view, $vars, TRUE ) );
+			ee()->output->send_ajax_response( ee()->load->view( $content_view, $vars, TRUE ) );
 		}
 		else
 		{
-			return $this->EE->load->view( '_wrapper', $vars, TRUE );
+			return ee()->load->view( '_wrapper', $vars, TRUE );
 		}
 	}
 
