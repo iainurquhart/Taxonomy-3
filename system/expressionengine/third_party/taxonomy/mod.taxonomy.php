@@ -85,7 +85,7 @@ class Taxonomy extends Taxonomy_base {
 	/**
      * The the url for a node from tree_id + (entry_id or node_id)
 	 */	
-	function node_url()
+	public function node_url()
 	{
 		
 		$tree_id 		= $this->_get_this('tree_id');
@@ -861,7 +861,7 @@ class Taxonomy extends Taxonomy_base {
     		if($level_count == 1 && $params['include_ul'] == 'yes' && $params['style'] == 'nested') 
 			{
 				$ul_css_id = ($params['ul_css_id'] != '') ? ' id="'.$params['ul_css_id'].'"' : '';
-				$ul_css_class = ($params['ul_css_class'] != '') ? ' id="'.$params['ul_css_class'].'"' : '';
+				$ul_css_class = ($params['ul_css_class'] != '') ? ' class="'.$params['ul_css_class'].'"' : '';
 				$str = "\n<".$params['list_type'].$ul_css_id.$ul_css_class.'>';
 			}
     		// set the default vars
