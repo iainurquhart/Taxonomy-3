@@ -40,7 +40,7 @@
 	{
 		$this->table->add_row(
 			form_label( lang('tx_member_preferences'), 'allowed_member_groups' ),
-			form_multiselect('tree[member_groups][]', $tree_options['allowed_member_groups'], $tree['permissions'], 'id="allowed_member_groups"')	
+			form_multiselect('tree[member_groups][]', $tree_options['allowed_member_groups'], $tree['member_groups'], 'id="allowed_member_groups"')	
 		);
 	}
 	else
