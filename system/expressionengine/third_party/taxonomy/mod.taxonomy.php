@@ -146,7 +146,7 @@ class Taxonomy extends Taxonomy_base {
 		if(!$tree_id)
 			return NULL;
 
-		ee()->load->model('taxonomy_model');
+		ee()->load->model('taxonomy_model', 'taxonomy');
 
 		ee()->taxonomy->set_table( $tree_id );
 
