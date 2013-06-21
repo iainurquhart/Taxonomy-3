@@ -14,7 +14,11 @@ These docs are really loose and are by no means complete, but should be sufficie
 
 3. exp:taxonomy:entries is a new tag which largely removes the need for embeds when outputting child teasers on landing pages.
 
-4. get_sibling_ids, next_node and prev_node are a work in progress. If you're updating and make use of these tags, best wait till they are done.
+4. No more 'Use Page Uri' options in the backend; if a node entry has a uri, Taxonomy is going to assume you want to use it.
+
+5. The UI has been redesigned and the db schema now uses nested set and adjacency model for heirarchy
+
+4. :get_sibling_ids, :next_node and :prev_node are a work in progress. If you're updating and make use of these tags, best wait till they are done.
 
 ### Code Examples
 
@@ -91,7 +95,7 @@ Full example using Stash
 		{/exp:stash:set}
 
 		{exp:stash:set name="main_content"}
-		
+
 			{if page_introduction}
 			<h3 class="kicker">{page_introduction}</h3>
 			{/if}
