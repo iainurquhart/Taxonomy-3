@@ -4,7 +4,7 @@
 
 Taxonomy 3.0 is a rewrite of 2.0, and includes breaking changes as some of the primary tags behave differently to previous versions. You will *have* to update some template code if you are updating from 2.x. If you want to revert to 2.0, you'll need to reinstate the taxonomy database tables as 3.0 changes the db schema also.
 
-These docs are really loose and are by no means complete, but should be sufficient to get you going with 3.0. Nearly all tag parameters and variables exist using the [2.x docs](http://iain.co.nz.taxonomy/)
+These docs are really loose and are by no means complete, but should be sufficient to get you going with 3.0. Nearly all tag parameters and variables exist using the [2.x docs](http://iain.co.nz/taxonomy/)
 
 #### Main changes
 
@@ -35,6 +35,19 @@ Updated :nav tag with {children} var, and &lt;li&gt; wrappers
 		display_root="no"
 	}
 		<li><a href="{node_url}">{node_title}</a>{children}</li>
+	{/exp:taxonomy:nav}
+
+Updated linear :nav tag using own output of wrapper ul and li active, active_parent classes
+
+	{exp:taxonomy:nav 
+	    auto_expand="yes"
+	    tree_id="1"
+	    style="linear"
+	}
+	    {if node_level_count == 1}<ul>{/if}
+	    <li class="node_{node_id}{if node_active} active{/if}{if node_active_parent} active_parent{/if}">
+	        <a href="{node_url}">{node_title}</a>{children}</li>
+	    {if node_level_count == node_level_total_count}</ul>{/if}
 	{/exp:taxonomy:nav}
 
 --
