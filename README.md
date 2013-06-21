@@ -2,13 +2,13 @@
 
 ### Overview
 
-Taxonomy 3.0 is a rewrite of 2.0, and includes breaking changes as some of the primary tags behave differently to previous versions.
+Taxonomy 3.0 is a rewrite of 2.0, and includes breaking changes as some of the primary tags behave differently to previous versions. You will *have* to update some template code. If you want to revert to 2.0, you'll need to reinstate the taxonomy database tables as 3.0 changes the db schema also.
 
 These docs are really loose and are by no means complete, but should be sufficient to get you going with 3.0
 
 #### Main changes
 
-1. taxonomy:nav tag does not automatically add the <li> elements any more, giving you FULL control over the output markup.
+1. taxonomy:nav tag does not automatically add the &lt;li&gt; elements any more, giving you FULL control over the output markup.
 
 2. taxonomy:breadcrumbs is now a tag pair, also giving you FULL control of the output markup.
 
@@ -20,7 +20,7 @@ Set your current tree so you don't have to keep adding the tree_id parameter, as
 
 	{exp:taxonomy:set_node tree_id="1" entry_id="{entry_id}"}
 
-Updated :nav tag with {children} var, and <li> wrappers
+Updated :nav tag with {children} var, and &lt;li&gt; wrappers
 
 	{exp:taxonomy:nav 
 		auto_expand="yes"
