@@ -1002,8 +1002,8 @@ class Taxonomy extends Taxonomy_base {
 					'node_has_children' => (isset($node['children'])) ? 1 : 0,
 					'node_next_child' => $att['lft']+1,
 					'node_level' => $node['level'],
-					'node_level_count' => $level_count++,
-					'node_level_total_count' => $level_total_count+1,
+					'node_level_count' => $level_count,
+					'node_level_total_count' => $level_total_count,
 					'node_indent' => str_repeat(' ', $level_count),
 					'children' => ''
 				);
@@ -1035,10 +1035,12 @@ class Taxonomy extends Taxonomy_base {
     		$str .= ee()->functions->var_swap($tmp, $vars);
 
     		// close out our list
-    		if($level_count == $level_total_count+1 && $params['include_ul'] == 'yes' && $params['style'] == 'nested') 
+    		if($level_count == $level_total_count && $params['include_ul'] == 'yes' && $params['style'] == 'nested') 
 			{
 				$str .= "\n</".$params['list_type'].'>';
 			}
+
+			$level_count++;
 
     	}
 
