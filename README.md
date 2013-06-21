@@ -14,6 +14,8 @@ These docs are really loose and are by no means complete, but should be sufficie
 
 3. exp:taxonomy:entries is a new tag which largely removes the need for embeds when outputting child teasers on landing pages.
 
+4. get_sibling_ids, next_node and prev_node are a work in progress. If you're updating and make use of these tags, best wait till they are done.
+
 ### Code Examples
 
 Set your current tree so you don't have to keep adding the tree_id parameter, as before. Optionally (and preferably implicitly declare the current node's entry_id)
