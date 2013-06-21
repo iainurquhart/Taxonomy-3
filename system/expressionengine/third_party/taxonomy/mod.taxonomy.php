@@ -987,8 +987,6 @@ class Taxonomy extends Taxonomy_base {
     				$active_parent = 'active_parent';
     			}
 
-    			print_r($att); exit();
-
     			$vars = array(
 					'node_id' => $att['node_id'],
 					'node_title' => $att['label'],
