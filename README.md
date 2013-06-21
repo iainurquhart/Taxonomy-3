@@ -22,6 +22,8 @@ Set your current tree so you don't have to keep adding the tree_id parameter, as
 
 	{exp:taxonomy:set_node tree_id="1" entry_id="{entry_id}"}
 
+--
+
 Updated :nav tag with {children} var, and &lt;li&gt; wrappers
 
 	{exp:taxonomy:nav 
@@ -35,7 +37,7 @@ Updated :nav tag with {children} var, and &lt;li&gt; wrappers
 
 Updated :breadcrumbs tag using {here}
 
-	{exp:taxonomy:breadcrumbs tree_id="1"}
+	{exp:taxonomy:breadcrumbs}
 		{if here}
 			{node_title}
 		{if:else}
@@ -56,7 +58,62 @@ New :entries tag can be dropped right inside an outer channel entries tag. Works
 		</article>
 	{/exp:taxonomy:entries}
 
+--
 
+Full example using Stash
+
+{exp:channel:entries limit="1" ... }
+
+		{exp:taxonomy:set_node tree_id="1" entry_id="{entry_id}"}
+
+		{exp:stash:set_value name="page_title" value="{title}"}
+
+		{exp:stash:set name="breadcrumbs"}
+			{exp:taxonomy:breadcrumbs}
+				{if here}
+					{node_title}
+				{if:else}
+					<a href="{node_url}">{node_title}</a> &rarr; 
+				{/if}
+			{/exp:taxonomy:breadcrumbs}
+		{/exp:stash:set}
+
+		{exp:stash:set name="subnav"}
+			{exp:taxonomy:nav 
+				ul_css_class="categories"
+				auto_expand="yes"
+				active_branch_start_level="1"}
+				<li><a href="{node_url}">
+					{if node_active}<strong>{/if}
+					{node_title}
+					{if node_active}</strong>{/if}</a>
+					{children}</li>
+			{/exp:taxonomy:nav}
+		{/exp:stash:set}
+
+		{exp:stash:set name="main_content" parse_tags="yes"}
+			{if page_introduction}
+			<h3 class="kicker">{page_introduction}</h3>
+			{/if}
+
+			{main_content}
+
+			{exp:taxonomy:entries parent_entry_id="{entry_id}" dynamic="no"}
+				{if tx:count == 1}
+					<h3>In this section</h3>
+					<div class="line"></div>
+				{/if}
+				<article class="post medium">
+					<h2><a href="{exp:taxonomy:node_url entry_id="{tx:entry_id}"}">{tx:title}</a></h2>
+					</header>
+					<p>{tx:page_introduction}</p>
+				</article>
+			{/exp:taxonomy:entries}
+		{/exp:stash:set}
+
+	{/exp:channel:entries}
+
+--
 
 ### Installing/Updating
 Please review the following instructions: 
