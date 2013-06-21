@@ -83,11 +83,10 @@ Full example using Stash
 				ul_css_class="categories"
 				auto_expand="yes"
 				active_branch_start_level="1"}
-				<li><a href="{node_url}">
-					{if node_active}<strong>{/if}
-					{node_title}
-					{if node_active}</strong>{/if}</a>
-					{children}</li>
+				<li{if node_active} class="active"{/if}>
+					<a href="{node_url}">{node_title}</a>
+					{children}
+				</li>
 			{/exp:taxonomy:nav}
 		{/exp:stash:set}
 
