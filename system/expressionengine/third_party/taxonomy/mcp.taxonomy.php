@@ -643,7 +643,15 @@ class Taxonomy_mcp extends Taxonomy_base {
 
 		$cp_page_title = lang($lang_key);
 
-		ee()->cp->set_variable( 'cp_page_title', $cp_page_title );
+		if(version_compare(APP_VER, '2.6', '>=')) 
+		{
+            ee()->view->cp_page_title = $cp_page_title;
+        } 
+        else 
+        {
+            ee()->cp->set_variable('cp_page_title', $cp_page_title);
+        }
+
 		ee()->cp->set_breadcrumb( $this->base_url, TAXONOMY_NAME );
 
 		if( $this->is_ajax_request() )
