@@ -401,6 +401,13 @@ class Taxonomy_mcp extends Taxonomy_base {
 			$node['depth'] = $parent['depth']+1;
 		}
 
+		// if the 'Custom Link' checkbox isn't checked, do away
+		// with the custom url value
+		if(!isset($node['type']['custom']))
+		{
+			$node['custom_url'] = '';
+		}
+
 		// are we editing an existing node?
 		if( isset($node['node_id']) && $node['node_id'] != '' )
 		{
