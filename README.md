@@ -4,7 +4,7 @@
 
 Taxonomy 3.0 is a rewrite of 2.0, and includes breaking changes as some of the primary tags behave differently to previous versions. You will *have* to update some template code if you are updating from 2.x. If you want to revert to 2.0, you'll need to reinstate the taxonomy database tables as 3.0 changes the db schema also.
 
-These docs are really loose and are by no means complete, but should be sufficient to get you going with 3.0
+These docs are really loose and are by no means complete, but should be sufficient to get you going with 3.0. Nearly all tag parameters and variables exist using the [2.x docs](http://iain.co.nz.taxonomy/)
 
 #### Main changes
 
@@ -16,13 +16,13 @@ These docs are really loose and are by no means complete, but should be sufficie
 
 4. No more 'Use Page Uri' options in the backend; if a node entry has a uri, Taxonomy is going to assume you want to use it.
 
-5. The UI has been redesigned and the db schema now uses nested set and adjacency model for heirarchy
+5. The UI has been redesigned and the db schema now uses nested set and adjacency model for heirarchy.
 
 4. :get_sibling_ids, :next_node and :prev_node are a work in progress. If you're updating and make use of these tags, best wait till they are done.
 
 ### Code Examples
 
-Set your current tree so you don't have to keep adding the tree_id parameter, as before. Optionally (and preferably implicitly declare the current node's entry_id)
+Set your current tree so you don't have to keep adding the tree_id parameter, as before. Optionally (and preferably) implicitly declare the current node's entry_id:
 
 	{exp:taxonomy:set_node tree_id="1" entry_id="{entry_id}"}
 
