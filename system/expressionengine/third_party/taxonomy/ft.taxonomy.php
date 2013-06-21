@@ -62,7 +62,7 @@ class Taxonomy_ft extends EE_Fieldtype {
 	 */
 	public function __construct()
 	{
-		parent::EE_Fieldtype();
+		parent::__construct();
 		$this->site_id = ee()->config->item('site_id');
 		$this->cache =& ee()->session->cache['taxonomy_ft_data'];
 	}
