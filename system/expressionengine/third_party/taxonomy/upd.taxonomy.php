@@ -161,9 +161,241 @@ class Taxonomy_upd extends Taxonomy_base {
 	 * @return 	boolean 	TRUE
 	 */	
 	public function update($current = '')
-	{
+	{	
+
+		/*
+		3.0 Update requirements
+		exp_taxonomy_trees
+		====================
+		x== add 'name' column - which is a url_title of 'label'
+		x== rename 'template_preferences' to 'templates'
+		x== rename 'channel_preferences' to 'channels'
+		x== rename 'permissions' to 'member_groups'
+		x== base64_decode, unserialize 'fields' and json_encode them
+		x== rename 'tree_array' to 'taxonomy' and update tree structures
+
+		exp_taxonomy_tree_x
+		=====================
+		
+		*/
+
+		
+		if ($current < '3.0') 
+		{
+			ee()->load->dbforge();
+			ee()->load->helper('url');
+			ee()->load->model('taxonomy_model', 'taxonomy');
+
+			// ------------------------------------------------------
+			// UPDATES TO exp taxonomy_trees
+			// ------------------------------------------------------
+			// ---------------------------
+			// add the name column
+			// ---------------------------
+			$fields = array(
+				'name'	=> array(
+					'type' => 'varchar',
+					'constraint' => '250'
+				)
+			);
+			ee()->dbforge->add_column('taxonomy_trees', $fields);
+			// ---------------------------
+
+			// ---------------------------
+			// rename 'template_preferences' to 'templates'
+			// ---------------------------
+			$fields = array(
+				'template_preferences' => array(
+					'name' => 'templates',
+					'type' => 'varchar',
+					'constraint' => '250', 
+					'default' => 'all'
+				),
+			);
+			ee()->dbforge->modify_column('taxonomy_trees', $fields);
+			// ---------------------------
+
+			// ---------------------------
+			// rename 'channel_preferences' to 'channels'
+			// ---------------------------
+			$fields = array(
+				'channel_preferences' => array(
+					'name' => 'channels',
+					'type' => 'varchar',
+					'constraint' => '250', 
+					'default' => 'all'
+				),
+			);
+			ee()->dbforge->modify_column('taxonomy_trees', $fields);
+			// ---------------------------
+
+			// ---------------------------
+			// rename 'permissions' to 'member_groups'
+			// ---------------------------
+			$fields = array(
+				'permissions' => array(
+					'name' => 'member_groups',
+					'type' => 'varchar',
+					'constraint' => '250'
+				),
+			);
+			ee()->dbforge->modify_column('taxonomy_trees', $fields);
+			// ---------------------------
+
+			// ---------------------------
+			// rename 'tree_array' to 'taxonomy'
+			// ---------------------------
+			$fields = array(
+				'tree_array' => array(
+					'name' => 'taxonomy',
+					'type' => 'longtext'
+				),
+			);
+			ee()->dbforge->modify_column('taxonomy_trees', $fields);
+			// ---------------------------
+
+			// update data stored from encoded serialized to json
+			// and insert missing values to new columns
+			$trees = ee()->db->get('taxonomy_trees')->result_array();
+			foreach($trees as $tree)
+			{
+				ee()->taxonomy->set_table( $tree['id'] );
+				$taxonomy = json_encode( ee()->taxonomy->get_tree_taxonomy() );
+				// modify each tree table column names
+	            ee()->db->where('id', $tree['id']);
+	            // if fields has data, decode it so it can be json encoded
+	            $field_data = ($tree['fields'] != '') ? unserialize(base64_decode($tree['fields'])) : '';
+	            $data = array(
+	            	'name' => url_title($tree['label'], '_', TRUE),
+	            	'fields' => ($field_data) ? json_encode($field_data) : '',
+	            	'taxonomy' => $taxonomy 
+	            );
+				ee()->db->update('taxonomy_trees', $data );
+
+				/*
+					add 'depth' column
+					add 'parent' column
+					add 'type' column
+					base64_decode, unserialize 'field_data' and json_encode them
+				*/
+
+				// ---------------------------
+				// add the depth, parent and type columns
+				// ---------------------------
+				$fields = array(
+					'depth'	=> array(
+						'type' => 'mediumint',
+						'constraint'	=> '8',
+						'unsigned'	=>	TRUE
+					),
+					'parent' => array(
+						'type' => 'mediumint',
+						'constraint'	=> '8',
+						'unsigned'	=>	TRUE
+					),
+					'type' => array(
+						'type' => 'varchar', 
+						'constraint' => '250', 
+						'null' => TRUE
+					)
+				);
+				ee()->dbforge->add_column('taxonomy_tree_'.$tree['id'], $fields);
+				// ---------------------------
+
+				// update node values
+				// add depth and parent data
+				$nodes = ee()->db->get('taxonomy_tree_'.$tree['id'])->result_array();
+
+				$a_data = $this->_build_adjacency_data($tree['id']);
+
+				foreach($nodes as $node)
+				{
+
+					// we have to establish the depth, so find parents
+					ee()->db->select('node_id')
+						 ->where('lft <', $node['lft'])
+						 ->where('rgt >', $node['rgt'])
+						 ->group_by("lft")
+						 ->order_by("lft", "asc");
+
+					$parents = ee()->db->get( 'taxonomy_tree_'.$tree['id'] )->result_array();
+
+					// extract existing field data if it exists
+					$field_data = ($node['field_data'] != '') ?  unserialize(base64_decode($node['field_data'])) : '';
+
+					// extract node types
+					$type = array();
+					if($node['entry_id']) $type[] = 'entry';
+					if($node['template_path']) $type[] = 'template';
+					if($node['custom_url'] && $node['custom_url'] != '[page_uri]') $type[] = 'custom';
+
+					$data = array(
+		            	'field_data' => ($field_data) ? json_encode($field_data) : '',
+		            	'type' => implode('|', $type),
+		            	'custom_url' => ($node['custom_url'] == '[page_uri]') ? '' : $node['custom_url'],
+		            	'parent' => (isset($a_data[ $node['node_id'] ])) ? $a_data[ $node['node_id'] ] : 0,
+		            	'depth' => count($parents)
+		            );
+		            ee()->db->where('node_id', $node['node_id']);
+					ee()->db->update('taxonomy_tree_'.$tree['id'], $data );
+				}
+
+
+			}
+			// ------------------------------------------------------
+
+
+			// ------------------------------------------------------
+			// UPDATES TO exp taxonomy_tree_x
+			// ------------------------------------------------------
+
+
+		}
+
+
+
 		// If you have updates, drop 'em in here.
 		return TRUE;
+
+		
+
+	}
+
+	private function _build_adjacency_data($tree_id = 0)
+	{
+
+		if(!$tree_id)
+			return;
+		
+		$data = array();
+		
+		$query = 'SELECT
+			node.label AS name,
+           	node.node_id,
+           	parent.label AS parent_name,
+            parent.node_id AS parent_node_id
+            
+			FROM exp_taxonomy_tree_'.$tree_id.' AS node
+			
+           	LEFT JOIN exp_taxonomy_tree_'.$tree_id.' AS parent
+           	
+           	ON parent.lft = (
+                SELECT           MAX(rel.lft)
+                FROM             exp_taxonomy_tree_'.$tree_id.' AS rel
+                WHERE            rel.lft < node.lft AND rel.rgt > node.rgt
+            )
+
+			ORDER BY node.lft ASC;';
+
+		$query = ee()->db->query($query);	
+		
+		foreach($query->result_array() as $row)
+		{
+			$data[ $row['node_id'] ] = $row['parent_node_id'];
+		}
+		
+		return $data;
+	
 	}
 	
 }
