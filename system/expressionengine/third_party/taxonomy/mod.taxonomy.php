@@ -668,6 +668,60 @@ class Taxonomy extends Taxonomy_base {
 		return str_replace($prefix, '', $this->EE->TMPL->tagdata);
 
 	}
+
+
+	public function get_children_ids()
+	{
+		$tree_id 		= $this->_get_this('tree_id');
+
+		if(!$tree_id)
+			return '';
+
+		$entry_id 		= $this->_get_this('entry_id');
+		$node_id 		= $this->_get_this('node_id');
+		
+		$this_node = '';
+
+		if($entry_id )
+		{
+			$this_node = ee()->taxonomy->get_node( $entry_id, 'entry_id');
+		}
+		elseif($node_id)
+		{
+			$this_node = ee()->taxonomy->get_node( $node_id, 'node_id');
+		}
+		else
+		{
+			return '';
+		}
+
+		// load what we need from the tree structure
+		ee()->taxonomy->get_tree();
+		ee()->taxonomy->get_nodes(); // loads the session array with node data
+
+		$node_cache = (isset($this->cache['trees'][$tree_id]['nodes'])) 
+						? $this->cache['trees'][$tree_id]['nodes'] : ''; // shortcut
+
+		$ids = array();
+
+		if($node_cache)
+		{
+			if(isset($node_cache['by_node_id']) && is_array($node_cache['by_node_id']))
+			{
+				foreach($node_cache['by_node_id'] as $node)
+				{
+					if($this_node['node_id'] == $node['parent'] && $node['entry_id'] != '')
+					{	
+						$ids[$node['lft']] = $node['entry_id'];
+					}
+				}
+				ksort($ids);
+			}
+		}
+
+		return implode('|', $ids);
+
+	}
 	
 
 	// --------------------------------------------------------------------
@@ -827,6 +881,8 @@ class Taxonomy extends Taxonomy_base {
 		}	
 
 	}
+
+
 
 
 	// --------------------------------------------------------------------
