@@ -90,32 +90,50 @@ class Taxonomy_ext {
 	{
 		// Setup custom settings in this array.
 		$this->settings = array();
-		
-		$data = array(
-			'class'		=> __CLASS__,
-			'method'	=> 'sessions_end',
-			'hook'		=> 'sessions_end',
-			'settings'	=> serialize($this->settings),
-			'version'	=> $this->version,
-			'enabled'	=> 'y'
+
+		$hooks = array(
+			'entry_submission_end',
+			'update_multi_entries_loop',
+			'cp_menu_array'
 		);
 
-		ee()->db->insert('extensions', $data);			
-		
-	}	
+		foreach($hooks as $hook)
+		{
+			$data = array(
+				'class'		=> __CLASS__,
+				'method'	=> $hook,
+				'hook'		=> $hook,
+				'settings'	=> serialize($this->settings),
+				'version'	=> $this->version,
+				'enabled'	=> 'y'
+			);
 
-	// ----------------------------------------------------------------------
-	
-	/**
-	 * sessions_end
-	 *
-	 * @param 
-	 * @return 
-	 */
+			ee()->db->insert('extensions', $data);
+		}	
+		
+	}
+
+	public function cp_menu_array($menu)
+	{
+		return $menu;
+	}
+
+	public function entry_submission_end($submitted_entry_id, $submitted_meta, $submitted_data)
+	{
+		return '';
+	}
+
+	public function update_multi_entries_loop($submitted_id, $submitted_data)
+	{
+		return $menu;
+	}
+
 	public function sessions_end()
 	{
 		// Add Code for the sessions_end hook here.  
 	}
+
+	// ----------------------------------------------------------------------
 
 	// ----------------------------------------------------------------------
 
