@@ -172,7 +172,7 @@ class Taxonomy_ext {
 			foreach($query->result_array() as $row)
 			{
 				// check permissions for each tree
-				if( has_access_to_tree(ee()->session->userdata['group_id'], $row['permissions']) )
+				if( has_access_to_tree(ee()->session->userdata['group_id'], $row['member_groups']) )
 				{	
 					// how irritating is the 'nav_' prefix? Very farking irritating.
 					ee()->lang->language['nav_taxonomy_'.$row['label']] = $row['label'];
