@@ -90,7 +90,8 @@ Full example using Stash
 			{/exp:taxonomy:nav}
 		{/exp:stash:set}
 
-		{exp:stash:set name="main_content" parse_tags="yes"}
+		{exp:stash:set name="main_content"}
+		
 			{if page_introduction}
 			<h3 class="kicker">{page_introduction}</h3>
 			{/if}
