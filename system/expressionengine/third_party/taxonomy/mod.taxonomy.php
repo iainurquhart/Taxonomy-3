@@ -160,7 +160,7 @@ class Taxonomy extends Taxonomy_base {
 		$depth = 0;	
 
 		// load what we need
-		$tree = ee()->taxonomy->get_tree();
+		ee()->taxonomy->get_tree();
 		ee()->taxonomy->get_nodes(); // loads the session array with node data
 
 		$node_cache = (isset($this->cache['trees'][$tree_id]['nodes'])) ? $this->cache['trees'][$tree_id]['nodes'] : array();
@@ -270,6 +270,26 @@ class Taxonomy extends Taxonomy_base {
 			$vars[] = $this_node_vars; // no parents, just our current node then
 		}
 
+		if($display_root == 'no')
+		{
+			$vars = array_slice($vars, 1);
+			foreach($vars as $key => &$var)
+			{
+				$var['node_count'] = $key+1;
+				$var['node_total_count'] = count($vars);
+			}
+		}
+
+		if($include_here == 'no')
+		{
+			$vars = array_slice($vars, 0, -1);
+			foreach($vars as $key => &$var)
+			{
+				$var['node_count'] = $key+1;
+				$var['node_total_count'] = count($vars);
+			}
+		}
+
 		if($reverse == 'yes')
 		{
 			 $vars = array_reverse($vars);
@@ -278,6 +298,10 @@ class Taxonomy extends Taxonomy_base {
 			 	$var['node_count'] = $key+1;
 			 }
 		}
+
+		if(!count($vars)) return '';
+
+
 
 		$r = ee()->TMPL->parse_variables(ee()->TMPL->tagdata, $vars);
 
