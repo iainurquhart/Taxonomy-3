@@ -348,6 +348,10 @@ class Taxonomy extends Taxonomy_base {
 			return '';
 		} 
 
+		if (! isset(ee()->session->cache['taxonomy_node_count']))
+		{
+			ee()->session->cache['taxonomy_node_count'] = 1;
+		}
 
 		// tag parameters
 		// --------------------------------------------------
@@ -595,6 +599,9 @@ class Taxonomy extends Taxonomy_base {
 		}
 
 		$this->cache['first_pass'] = 1;
+
+		// reset the node_count as multiple trees may be output
+		if (isset(ee()->session->cache['taxonomy_node_count'])){ee()->session->cache['taxonomy_node_count'] = 1;}
 
 		return $r;
 
@@ -980,6 +987,8 @@ class Taxonomy extends Taxonomy_base {
     				$active_parent = 'active_parent';
     			}
 
+    			print_r($att); exit();
+
     			$vars = array(
 					'node_id' => $att['node_id'],
 					'node_title' => $att['label'],
@@ -994,17 +1003,18 @@ class Taxonomy extends Taxonomy_base {
 					'node_field_data' => $att['field_data'],
 					'node_entry_title' => $att['title'],
 					'node_entry_url_title' => $att['url_title'],
-					'node_entry_status' => $att['url'],
-					'node_entry_entry_date' => $att['status'],
+					'node_entry_status' => $att['status'],
+					'node_entry_entry_date' => $att['entry_date'],
 					'node_entry_expiration_date' => $att['expiration_date'],
-					'node_entry_template_name' => '',
-					'node_entry_template_group_name' => '',
+					'node_entry_template_name' => '', // @todo
+					'node_entry_template_group_name' => '', // @todo
 					'node_has_children' => (isset($node['children'])) ? 1 : 0,
 					'node_next_child' => $att['lft']+1,
 					'node_level' => $node['level'],
 					'node_level_count' => $level_count,
 					'node_level_total_count' => $level_total_count,
 					'node_indent' => str_repeat(' ', $level_count),
+					'node_count' => ee()->session->cache['taxonomy_node_count']++,
 					'children' => ''
 				);
 				
