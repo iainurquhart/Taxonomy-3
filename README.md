@@ -62,7 +62,7 @@ New :entries tag can be dropped right inside an outer channel entries tag. Works
 
 Full example using Stash
 
-{exp:channel:entries limit="1" ... }
+	{exp:channel:entries limit="1" ... }
 
 		{exp:taxonomy:set_node tree_id="1" entry_id="{entry_id}"}
 
