@@ -115,7 +115,81 @@ class Taxonomy_ext {
 
 	public function cp_menu_array($menu)
 	{
-		return $menu;
+		// play nice with anyone elses extensions here.
+		if (ee()->extensions->last_call !== FALSE)
+		{
+			$menu = ee()->extensions->last_call;
+		}
+
+		// ----------------------------------------------------------------------
+		// Make sure we're outputting a nav at all
+		// ----------------------------------------------------------------------
+		
+		// bail here if the nav is disabled via config override.
+		// or if the user has access to no modules at all.
+		if(
+			(ee()->config->item('disable_taxonomy_cp_nav'))
+			OR 
+			( ! ee()->session->userdata('assigned_modules') || ! ee()->cp->allowed_group('can_access_addons', 'can_access_modules')) 
+			&& 
+			(ee()->session->userdata('group_id') != 1)
+		  )
+		{
+			return $menu;
+		}
+		
+		if (ee()->session->userdata('group_id') != 1)
+		{
+			// Has the user got access to the taxonomy module?
+			$taxonomy_module_id  = ee()->db->select('module_id')
+								  ->where('module_name', 'Taxonomy')
+								  ->get('modules')
+								  ->row('module_id');
+			
+			
+			if ( ! isset(ee()->session->userdata['assigned_modules'][$taxonomy_module_id]) OR  ee()->session->userdata['assigned_modules'][$taxonomy_module_id] !== TRUE)
+			{
+				return $menu;
+			}
+		}
+
+		// so we are outputting the nav
+
+		ee()->lang->loadfile('taxonomy');
+		ee()->load->helper('taxonomy');
+
+		$this->base = BASE.AMP.'C=addons_modules'.AMP.'M=show_module_cp'.AMP.'module=taxonomy';
+		$this->edit_tree_base = $this->base.AMP.'method=edit_nodes'.AMP.'tree_id=';
+		$this->module_label = lang('taxonomy_nav_label');
+		
+		$t_menu[$this->module_label] = array();
+		
+		// fetch our trees
+		$query = ee()->db->get_where('exp_taxonomy_trees',array('site_id' => ee()->config->item('site_id')));
+			
+		if ($query->num_rows() > 0)
+		{
+			foreach($query->result_array() as $row)
+			{
+				// check permissions for each tree
+				if( has_access_to_tree(ee()->session->userdata['group_id'], $row['permissions']) )
+				{	
+					// how irritating is the 'nav_' prefix? Very farking irritating.
+					ee()->lang->language['nav_taxonomy_'.$row['label']] = $row['label'];
+					$t_menu[$this->module_label] += array('taxonomy_'.$row['label'] => $this->edit_tree_base.$row['id']);
+				}
+			}
+		}
+
+		// seperator
+		$t_menu[$this->module_label][0] = '----';
+		
+		// overview item
+		$t_menu[$this->module_label] += array('overview' => $this->base);
+
+		// merge this into the nav array, after content.
+		return array_insert($menu, $t_menu, 1);
+
 	}
 
 	public function entry_submission_end($submitted_entry_id, $submitted_meta, $submitted_data)

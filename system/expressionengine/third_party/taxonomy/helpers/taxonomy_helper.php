@@ -51,3 +51,29 @@ function debug_array($array)
 
 
 // ----------------------------------------------------------------
+
+// ----------------------------------------------------------------------
+	
+	/**
+	 * Inserts our Taxonomy nav array into the main nav array at a specific position
+	 *
+	 * @return array
+	 */
+	
+	function array_insert($arr, $insert, $position) 
+	{
+		$i = 0;
+    	foreach ($arr as $key => $value) 
+    	{
+            if ($i == $position) 
+            {
+                    foreach ($insert as $ikey => $ivalue) 
+                    {
+                            $ret[$ikey] = $ivalue;
+                    }
+            }
+            $ret[$key] = $value;
+            $i++;
+    	}
+    	return $ret;
+	}
