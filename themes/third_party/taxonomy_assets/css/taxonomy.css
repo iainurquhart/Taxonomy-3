@@ -43,11 +43,15 @@
 #mainContent .taxonomy-content .cp_button a {
   font-weight: normal;
   font-size: 15px;
-  color: #fff;
+  color: #fff !important;
   padding: 7px 12px;
   background: #e11842 ;
   border: 1px solid #cc193e;
   border-radius: 5px;
+}
+
+#mainContent .taxonomy-content .cp_button.taxonomy_add_node a {
+	margin: 0px 0;
 }
 #mainContent .taxonomy-content .cp_button a:hover {
   box-shadow: none;
@@ -56,7 +60,7 @@
 #mainContent .taxonomy-content h2#taxonomy-tree-name {
   font-size: 26px;
   line-height: 26px;
-  margin: 15px 0 10px 0;
+  margin: 15px 0 10px 0 !important;
   padding: 0 0 0 10px;
   float: left;
   color: #37444D;
@@ -291,6 +295,7 @@
 #mainContent .taxonomy-content #taxonomy-list-container div.item-wrapper a.item-label:hover {
   color: #37444D;
   padding-right: 10px;
+  padding-left: 3px;
 }
 #mainContent .taxonomy-content #taxonomy-list-container div.item-wrapper .item-options {
   display: none;
@@ -354,6 +359,25 @@
 #mainContent .taxonomy-content #save-taxonomy {
   display: none;
 }
+
+ol#taxonomy-list li div.item-wrapper em.status_indicator,
+h3 div.item-wrapper em.status_indicator {position: absolute; left: 33px; top: 12px; width: 5px; height: 5px; border: 5px solid transparent; overflow: hidden; display: block; text-indent: -1000px; opacity: 0.6; 
+-moz-background-clip: border; /* Firefox 3.6 */
+-webkit-background-clip: border; /* Safari 4? Chrome 6? */
+background-clip: border-box; /* Firefox 4, Safari 5, Opera 10, IE 9 */
+-moz-background-clip: padding; /* Firefox 3.6 */
+-webkit-background-clip: padding; /* Safari 4? Chrome 6? */
+background-clip: padding-box; /* Firefox 4, Safari 5, Opera 10, IE 9 */
+-moz-background-clip: content; /* Firefox 3.6 */
+-webkit-background-clip: content; /* Safari 4? Chrome 6? */
+background-clip: content-box; /* Firefox 4, Safari 5, Opera 10, IE 9 */
+border-radius: 50px;
+}
+
+h3 div.item-wrapper em.status_indicator {left: 10px;}
+
+ol#taxonomy-list li div.item-wrapper:hover  em.status_indicator {opacity: 1}
+ol#taxonomy-list li div.item-wrapper em.status_indicator:hover{ }
 /*
 array('data' => $tree['id'], 'style' => ' text-align: center; text-shadow: 0 1px 0 #fff;  font-weight: bold;font-size: 14px;'),
 array('data' => $tree['edit_nodes_link'], 'style' => 'width: 60%;font-size: 14px; font-weight: bold;  text-shadow: 0 1px 0 #fff;'),
@@ -889,3 +913,32 @@ array('data' => $tree['delete_tree_link'], 'class' => 'taxonomy-tree-delete')
   left: 10px;
   top: 7px;
 }
+
+
+.tipsy { font-size: 10px; position: absolute; padding: 5px; z-index: 100000; }
+  .tipsy-inner { background-color: #000; color: #FFF; max-width: 200px; padding: 5px 8px 4px 8px; text-align: center; }
+
+  /* Rounded corners */
+  .tipsy-inner { border-radius: 3px; -moz-border-radius: 3px; -webkit-border-radius: 3px; }
+  
+  /* Uncomment for shadow */
+  /*.tipsy-inner { box-shadow: 0 0 5px #000000; -webkit-box-shadow: 0 0 5px #000000; -moz-box-shadow: 0 0 5px #000000; }*/
+  
+  .tipsy-arrow { position: absolute; width: 0; height: 0; line-height: 0; border: 5px dashed #000; }
+  
+  /* Rules to colour arrows */
+  .tipsy-arrow-n { border-bottom-color: #000; }
+  .tipsy-arrow-s { border-top-color: #000; }
+  .tipsy-arrow-e { border-left-color: #000; }
+  .tipsy-arrow-w { border-right-color: #000; }
+  
+	.tipsy-n .tipsy-arrow { top: 0px; left: 50%; margin-left: -5px; border-bottom-style: solid; border-top: none; border-left-color: transparent; border-right-color: transparent; }
+    .tipsy-nw .tipsy-arrow { top: 0; left: 10px; border-bottom-style: solid; border-top: none; border-left-color: transparent; border-right-color: transparent;}
+    .tipsy-ne .tipsy-arrow { top: 0; right: 10px; border-bottom-style: solid; border-top: none;  border-left-color: transparent; border-right-color: transparent;}
+  .tipsy-s .tipsy-arrow { bottom: 0; left: 50%; margin-left: -5px; border-top-style: solid; border-bottom: none;  border-left-color: transparent; border-right-color: transparent; }
+    .tipsy-sw .tipsy-arrow { bottom: 0; left: 10px; border-top-style: solid; border-bottom: none;  border-left-color: transparent; border-right-color: transparent; }
+    .tipsy-se .tipsy-arrow { bottom: 0; right: 10px; border-top-style: solid; border-bottom: none; border-left-color: transparent; border-right-color: transparent; }
+  .tipsy-e .tipsy-arrow { right: 0; top: 50%; margin-top: -5px; border-left-style: solid; border-right: none; border-top-color: transparent; border-bottom-color: transparent; }
+  .tipsy-w .tipsy-arrow { left: 0; top: 50%; margin-top: -5px; border-right-style: solid; border-left: none; border-top-color: transparent; border-bottom-color: transparent; }
+.tipsy em {color: #bababa; font-style: normal; font-size: 9px;position: relative; top: -1px;}
+.tipsy strong {font-size: 12px; }

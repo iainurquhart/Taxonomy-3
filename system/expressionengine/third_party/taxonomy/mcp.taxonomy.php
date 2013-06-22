@@ -269,6 +269,7 @@ class Taxonomy_mcp extends Taxonomy_base {
 		); 
 
 		ee()->cp->load_package_js('jquery.mjs.nestedSortable'); 
+		ee()->cp->load_package_js('jquery.tipsy'); 
 		ee()->javascript->compile();
 
 		$vars['nodes'] = ee()->taxonomy->get_nodes();

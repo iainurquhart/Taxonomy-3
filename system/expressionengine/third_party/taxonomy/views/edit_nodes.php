@@ -4,6 +4,10 @@
 		// fix for stoopid cursor bug
 		// http://forum.jquery.com/topic/chrome-text-select-cursor-on-drag
 		this.onselectstart = function () { return false; };
+
+		
+		$('span.node-info').tipsy({fade: false, gravity: 'e', html: true});
+		$('em.status_indicator').tipsy({fade: false, gravity: 's', html: true});
 		
 		$('ol#taxonomy-list').nestedSortable(
 		{	
