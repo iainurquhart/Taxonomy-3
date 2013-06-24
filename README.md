@@ -18,7 +18,9 @@ These docs are really loose and are by no means complete, but should be sufficie
 
 5. The UI has been redesigned and the db schema now uses nested set and adjacency model for heirarchy.
 
-4. :get_sibling_ids, :next_node and :prev_node are a work in progress. If you're updating and make use of these tags, best wait till they are done.
+4. :get_sibling_ids is now :sibling_entry_ids
+
+5. :next_node and :prev_node are a work in progress. If you're updating and make use of these tags, best wait till they are done.
 
 ### Code Examples
 
@@ -81,6 +83,7 @@ Full example using Stash
 
 	{exp:channel:entries limit="1" ... }
 
+		<!-- set the node and tree -->
 		{exp:taxonomy:set_node tree_id="1" entry_id="{entry_id}"}
 
 		{exp:stash:set_value name="page_title" value="{title}"}
@@ -95,6 +98,7 @@ Full example using Stash
 			{/exp:taxonomy:breadcrumbs}
 		{/exp:stash:set}
 
+
 		{exp:stash:set name="subnav"}
 			{exp:taxonomy:nav 
 				ul_css_class="categories"
@@ -107,14 +111,15 @@ Full example using Stash
 			{/exp:taxonomy:nav}
 		{/exp:stash:set}
 
-		{exp:stash:set name="main_content"}
 
+		{exp:stash:set name="main_content"}
 			{if page_introduction}
 			<h3 class="kicker">{page_introduction}</h3>
 			{/if}
 
 			{main_content}
 
+			<!-- show the child entries -->
 			{exp:taxonomy:entries parent_entry_id="{entry_id}" dynamic="no"}
 				{if tx:count == 1}
 					<h3>In this section</h3>
@@ -125,6 +130,19 @@ Full example using Stash
 					</header>
 					<p>{tx:page_introduction}</p>
 				</article>
+			{/exp:taxonomy:entries}
+		{/exp:stash:set}
+
+
+		{exp:stash:set name="related_information"}
+			<!-- show the sibling entries -->
+			{exp:taxonomy:entries fixed_order="{exp:taxonomy:sibling_entry_ids}" parse="inward" dynamic="no"}
+				{if tx:count == 1}
+					<h3>Related Content:</h3>
+				{/if}
+				<h1>{tx:title}</h1>
+				<p>{tx:page_introduction}</p>
+				<a href="{exp:taxonomy:node_url entry_id="{tx:entry_id}"}">{tx:title}</a>
 			{/exp:taxonomy:entries}
 		{/exp:stash:set}
 
