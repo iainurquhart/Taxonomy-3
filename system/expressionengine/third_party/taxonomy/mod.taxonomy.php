@@ -609,6 +609,11 @@ class Taxonomy extends Taxonomy_base {
 
 	// ----------------------------------------------------------------
 
+	public function get_sibling_ids()
+	{
+		return $this->sibling_entry_ids();
+	}
+
 	// return a pipe delimited string of entry_ids which are siblings to the node given.
 	public function sibling_entry_ids()
 	{
