@@ -608,6 +608,47 @@ class Taxonomy extends Taxonomy_base {
 	}
 
 	// ----------------------------------------------------------------
+
+	// return a pipe delimited string of entry_ids which are siblings to the node given.
+	public function sibling_entry_ids()
+	{
+
+		$tree_id 		= $this->_get_this('tree_id');
+		$entry_id 		= $this->_get_this('entry_id');
+		$include_current = $this->get_param('include_current', 'no');
+
+		// no tree, no entry, no partay.
+		if(!$tree_id || !$entry_id)
+			return '';
+
+		$r = array();
+
+		// load what we need from the tree structure
+		$tree = ee()->taxonomy->get_tree();
+		ee()->taxonomy->get_nodes(); // loads the session array with node data
+
+		$siblings = ee()->taxonomy->get_siblings($entry_id);
+
+		// we have sibling nodes
+		if(count($siblings))
+		{	
+			// build our array of sibling entry ids
+			foreach($siblings as $sibling)
+			{
+				$r[ $sibling['entry_id'] ] = $sibling['entry_id'];
+			}
+			// get rid of current node if it's not wanted
+			if($include_current != 'yes')
+			{
+				unset( $r[$entry_id] );
+			}
+		}
+
+		return implode('|', $r);
+
+	}
+
+	// ----------------------------------------------------------------
 	
 	public function entries()
 	{	
@@ -686,6 +727,22 @@ class Taxonomy extends Taxonomy_base {
 			ee()->TMPL->tagparams['fixed_order'] = $ids;
 		}
 		// ----------------------------------------------------------------
+
+		// if we're passing a null value into fixed order, EE decides to
+		// output all entries, which isn't helpful.
+		// if we're getting fixed order, and it's null, bail.
+		// --------------------------------------------------
+		if(is_array(ee()->TMPL->tagparams))
+		{
+			foreach (ee()->TMPL->tagparams as $key => $value)
+			{
+				if(isset(ee()->TMPL->tagparams['fixed_order']) && ee()->TMPL->tagparams['fixed_order'] == '')
+				{
+					return '';
+				}
+			}
+		}
+		// --------------------------------------------------
 
 		return ee()->taxonomy_entries->entries();
 	}

@@ -479,6 +479,27 @@ class Taxonomy_model extends Taxonomy_base
 
 	}
 
+	// --------------------------------------------------------------------
+	
+	/**
+	 * Returns the sibling entry ids of a given node
+	 * @return An array of nodes
+	 */
+	function get_siblings( $id, $type = 'entry_id')
+	{
+		$siblings = array();
+		$this_node = $this->get_node($id, $type);
+		if($this_node['parent'])
+		{
+			ee()->db->order_by("lft", "asc"); 
+			$siblings = ee()->db->get_where( 
+				$this->tree_table, 
+				array('parent' => $this_node['parent'])
+			)->result_array();
+		}
+		return $siblings;
+	}
+
 	// ------------------------------------------------------------------------
 
     /**
