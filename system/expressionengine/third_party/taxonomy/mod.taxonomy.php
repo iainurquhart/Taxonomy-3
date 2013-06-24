@@ -607,6 +607,98 @@ class Taxonomy extends Taxonomy_base {
 
 	}
 
+	public function next_node()
+	{
+		return $this->_sibling_node('next');
+	}
+
+	public function prev_node()
+	{
+		return $this->_sibling_node('prev');
+	}
+
+	// ----------------------------------------------------------------
+
+	private function _sibling_node($direction)
+	{
+		
+		$tree_id 		= $this->_get_this('tree_id');
+		$entry_id 		= $this->_get_this('entry_id');
+
+		// no tree or no entry && no node_id no partay.
+		if(!$tree_id || (!$entry_id && !$entry_id))
+			return '';
+
+		// load what we need from the tree structure
+		$tree = ee()->taxonomy->get_tree();
+		ee()->taxonomy->get_nodes(); // loads the session array with node data
+
+		$this_node = array();
+		$next_node = array();
+		$vars = array();
+
+		// does the node we're declaring exist?
+		if(isset($tree['nodes']['by_node_id']) && is_array($tree['nodes']['by_node_id']))
+		{
+			foreach($tree['nodes']['by_node_id'] as $key => $node)
+			{
+				// find our current node's data
+				if($node['entry_id'] == $entry_id)
+				{
+					$this_node = $tree['nodes']['by_node_id'][$key];
+					break;
+				}
+			}
+			if($this_node)
+			{
+				// get the direction
+				if($direction == 'next')
+				{
+					$key = 'lft';
+					$val = $this_node['rgt']+1;
+				}
+				else // prev
+				{
+					$key = 'rgt';
+					$val = $this_node['lft']-1;
+				}
+
+				// loop again and find what we're after
+				foreach($tree['nodes']['by_node_id'] as $node)
+				{
+					if(isset($node[$key]) && $node[$key] == $val)
+					{
+						$next_node = $node;
+						break;
+					}
+				}
+			}
+			
+		}
+
+		if($next_node)
+		{
+			foreach($next_node as $key => $val)
+			{
+				if($key == 'field_data' && $val != '')
+				{
+					 $val = array(json_decode($val, TRUE));
+				}
+				$vars[$direction.'_'.$key] = $val;
+			}
+		}
+
+		if($vars)
+		{
+			return ee()->TMPL->parse_variables(ee()->TMPL->tagdata, array($vars));
+		}
+		else
+		{
+			return '';
+		}
+		
+	}
+
 	// ----------------------------------------------------------------
 
 	public function get_sibling_ids()

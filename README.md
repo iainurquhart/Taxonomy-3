@@ -146,6 +146,18 @@ Full example using Stash
 			{/exp:taxonomy:entries}
 		{/exp:stash:set}
 
+		{exp:stash:set name="footer_nav"}
+
+			{exp:taxonomy:next_node tree_id="1" entry_id="{entry_id}"}
+			<p>Next node is <strong>{next_label}</strong></p>
+			{/exp:taxonomy:next_node}
+
+			{exp:taxonomy:prev_node tree_id="1" entry_id="{entry_id}"}
+			<p>Previous node is <strong>{prev_label}</strong></p>
+			{/exp:taxonomy:prev_node}
+
+		{/exp:stash:set}
+
 	{/exp:channel:entries}
 
 --
