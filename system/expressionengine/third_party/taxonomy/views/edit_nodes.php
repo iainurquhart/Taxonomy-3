@@ -1,5 +1,12 @@
 <script type="text/javascript">
 	$(document).ready(function(){
+
+		$(".delete_branch, .delete_node").click(function(e) { 
+			var answer = confirm("Are you sure you want to delete?")
+			if (!answer){
+				e.preventDefault();
+			}
+		});
 		
 		// fix for stoopid cursor bug
 		// http://forum.jquery.com/topic/chrome-text-select-cursor-on-drag
