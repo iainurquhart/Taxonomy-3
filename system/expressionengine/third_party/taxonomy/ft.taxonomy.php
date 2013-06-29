@@ -175,10 +175,17 @@ class Taxonomy_ft extends EE_Fieldtype {
 		if(count($vars['tree']['templates']))
 		{
 			$templates = ee()->taxonomy->get_templates();
+
 			foreach($vars['tree']['templates'] as $template)
 			{
-				$vars['templates'][$template] = $templates['by_id'][$template].'/';
+				if(isset($templates['by_id'][$template]))
+				{
+					// reduce double slashes doesn't work if all that's passed is '//'
+					$templates['by_id'][$template] = ($templates['by_id'][$template] == '/') ? '' : $templates['by_id'][$template];
+					$vars['templates'][$template] = $templates['by_id'][$template].'/';
+				}
 			}
+			
 		}
 
 		// no selected template, do we have a defualt template set?

@@ -74,6 +74,8 @@ $lang = array(
 	'tx_node_label' => "Label / Title:",
 	'tx_select_parent' => "Select Parent:",
 	"nav_taxonomy_nav_label"		=> "$taxonomy_nav_label",
+	"tx_select_template" => 'Select Template:',
+	'tx_fetch_title' => 'Fetch the Entry Title'
 );
 
 /* End of file lang.taxonomy.php */

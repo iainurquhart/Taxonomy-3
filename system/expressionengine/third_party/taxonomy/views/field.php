@@ -1,3 +1,16 @@
+<script type='text/javascript'>
+	// set the taxonomy label from the title
+	$(document).ready(function() {
+		$('.taxonomy_fetch_title').click(function(e) 
+		{	
+				e.preventDefault();
+				var titleval = $('input#title').val();
+				var fieldTable = $(this).closest('table');
+
+				fieldTable.find('.taxonomy_label').val(titleval);								
+		});
+	});
+</script>
 <?php
 	
 	echo form_hidden($settings['field_name'].'[tree_id]', $tree['id']);
@@ -11,8 +24,9 @@
 		);
 
 	$this->table->add_row(
-		lang('tx_node_label'),
-		form_input($settings['field_name'].'[label]', $data['label'])
+		array('data' => lang('tx_node_label').' <span class="taxonomy_fetch_title" title="'.lang('tx_fetch_title').'">+</span>',
+			 'style' => 'width: 200px'),
+		form_input($settings['field_name'].'[label]', $data['label'], 'class="taxonomy_label" style="width: 60%;"')
 	);
 
 	// prevent the current node from being selected as a parent
@@ -36,9 +50,9 @@
 		echo form_hidden($settings['field_name'].'[template_path]', $data['template_path']);
 	}
 	elseif(count($templates) && $hide_template === FALSE && $data['custom_url'] == '')
-	{
+	{	
 		$this->table->add_row(
-			lang('select_template'),
+			lang('tx_select_template'),
 			form_dropdown($settings['field_name'].'[template_path]', $templates, $data['template_path'])
 		);
 	}
@@ -51,21 +65,21 @@
 			if($taxonomy_field['type'] == 'text')
 			{
 				$this->table->add_row(
-					$taxonomy_field['label'],
+					$taxonomy_field['label'].':',
 					form_input($settings['field_name'].'[field_data]['.$taxonomy_field['name'].']', $value)
 				);
 			}
 			elseif($taxonomy_field['type'] == 'textarea')
 			{
 				$this->table->add_row(
-					$taxonomy_field['label'],
+					$taxonomy_field['label'].':',
 					form_textarea($settings['field_name'].'[field_data]['.$taxonomy_field['name'].']', $value)
 				);
 			}
 			elseif($taxonomy_field['type'] == 'checkbox')
 			{
 				$this->table->add_row(
-					$taxonomy_field['label'],
+					$taxonomy_field['label'].':',
 					form_checkbox($settings['field_name'].'[field_data]['.$taxonomy_field['name'].']', 1, $value )
 				);
 			}
