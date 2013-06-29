@@ -318,7 +318,7 @@ class Taxonomy_mcp extends Taxonomy_base {
 			
 			foreach($vars['tree']['templates'] as $template)
 			{
-				if($template != '')
+				if($template != '' && isset($vars['all_templates']['by_id'][$template]))
 				{
 					$vars['template_options'][$template] = $vars['all_templates']['by_id'][$template];
 				}
