@@ -368,6 +368,7 @@ class Taxonomy_ft extends EE_Fieldtype {
 			foreach($tree['templates'] as $template)
 			{	
 				if($template != '')
+				if($template != '' && isset($vars['templates']['by_id'][$template]))
 				{
 					$vars['template_options'][ $tree['id'] ][$template] = $vars['templates']['by_id'][$template];
 				}
