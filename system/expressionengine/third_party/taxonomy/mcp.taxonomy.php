@@ -312,7 +312,7 @@ class Taxonomy_mcp extends Taxonomy_base {
 
 		// do we have templates associated with this tree
 		// fetch options for selects
-		if($vars['tree']['templates'] != '')
+		if(count($vars['tree']['templates'] != ''))
 		{
 			$vars['all_templates'] = ee()->taxonomy->get_templates($this->site_id);
 			
@@ -329,7 +329,7 @@ class Taxonomy_mcp extends Taxonomy_base {
 
 		// do we have channels associated with this tree
 		// fetch entries for select
-		if($vars['tree']['channels'] != '')
+		if(count($vars['tree']['channels']))
 		{
 			$channels = ee()->taxonomy->get_channels();
 			$channel_entries = ee()->taxonomy->get_entries( $vars['tree']['channels'] );
