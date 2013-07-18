@@ -745,6 +745,7 @@ class Taxonomy_model extends Taxonomy_base
 		$data = $this->_sanitize_data( $data );
 		$data['depth'] = 0;
 		$data = array_merge( $data, array('lft' => 1, 'rgt' => 2) );
+		unset($data['node_id']);
 		ee()->db->insert( $this->tree_table, $data );
 		$this->_unlock_tree_table();
 		return true;
@@ -784,6 +785,7 @@ class Taxonomy_model extends Taxonomy_base
 						' WHERE rgt >= '.$lft);
 		
 		$data = array_merge( $data, array('lft' => $lft, 'rgt' => $lft+1) );
+		unset($data['node_id']);
 		ee()->db->insert( $this->tree_table, $data );
 		
 		if ($lock)
@@ -930,6 +932,7 @@ class Taxonomy_model extends Taxonomy_base
     	}
     	else
     	{
+    		unset($data['id']); // sql strict mode complains
     		ee()->db->insert('taxonomy_trees', $data);
     		$id = ee()->db->insert_id();
     		$this->build_tree_table( $id );
