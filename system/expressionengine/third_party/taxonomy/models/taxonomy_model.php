@@ -884,15 +884,30 @@ class Taxonomy_model extends Taxonomy_base
 	/**
 	 * Update a tree's taxonomy and timestamp
 	 */
-	 function update_taxonomy( $tree_array = array() )
+	 function update_taxonomy( $tree_array = array(), $type = '', $data = '' )
 	 {
-		$data['last_updated'] = time();
+
+		$tree['last_updated'] = time();
 
 		if($tree_array)
-			$data['taxonomy'] = $tree_array;
+			$tree['taxonomy'] = $tree_array;
 		
 		ee()->db->where('id', $this->tree_id);
-		ee()->db->update( 'taxonomy_trees', $data ); 
+		ee()->db->update( 'taxonomy_trees', $tree );
+
+		// -------------------------------
+		// 'taxonomy_updated' extension hook
+		//  called when:
+		//		update_node
+		// 		reorder_nodes
+		// 		delete_node
+		//		post_save on fieldtype
+		// -------------------------------
+		if (ee()->extensions->active_hook('taxonomy_updated'))
+		{
+			ee()->extensions->call('taxonomy_updated', $this->tree_id, $type, $data);
+		}
+		
 	 }
 
 	// --------------------------------------------------------------------

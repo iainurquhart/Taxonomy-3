@@ -429,7 +429,7 @@ class Taxonomy_mcp extends Taxonomy_base {
 		}
 
 		$tree_array = json_encode( ee()->taxonomy->get_tree_taxonomy() );
-		ee()->taxonomy->update_taxonomy( $tree_array );
+		ee()->taxonomy->update_taxonomy( $tree_array, 'update_node', $node );
 
 		ee()->session->set_flashdata('message_success', $msg);
 		ee()->functions->redirect( $this->base_url.AMP.'method=edit_nodes'.AMP.'tree_id='.$node['tree_id'] );
@@ -463,8 +463,8 @@ class Taxonomy_mcp extends Taxonomy_base {
 
 		ee()->taxonomy->reorder_nodes($taxonomy_data);
 
-		$tree_array = json_encode( ee()->taxonomy->get_tree_taxonomy() );
-		ee()->taxonomy->update_taxonomy( $tree_array );
+		$tree_array = ee()->taxonomy->get_tree_taxonomy();
+		ee()->taxonomy->update_taxonomy( json_encode( $tree_array), 'reorder_nodes', $tree_array );
 
 		// lets just be sure of timestamps and get the tree settings again.
 		unset($tree_settings);
@@ -494,7 +494,7 @@ class Taxonomy_mcp extends Taxonomy_base {
 		ee()->taxonomy->{$type}( $node['lft'] );
 
 		$tree_array = json_encode( ee()->taxonomy->get_tree_taxonomy() );
-		ee()->taxonomy->update_taxonomy( $tree_array );
+		ee()->taxonomy->update_taxonomy( $tree_array, $type, $node );
 
 		ee()->session->set_flashdata('message_success', ee()->lang->line('node_deleted'));
 		ee()->functions->redirect($this->base_url.AMP.'method=edit_nodes'.AMP.'tree_id='.$tree_id);

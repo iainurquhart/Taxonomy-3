@@ -234,6 +234,9 @@ class Taxonomy_ft extends EE_Fieldtype {
 		$data = $this->cache['data'][$this->settings['field_id']];
 		$data['entry_id'] = $this->settings['entry_id'];
 		$data['type'][] = 'entry';
+		$ext_info = array(
+			'update_type' => 'no_node_data'
+		);
 
 		if(!$data['label']) return '';
 
@@ -266,6 +269,10 @@ class Taxonomy_ft extends EE_Fieldtype {
 		// updating a node?
 		if( isset($data['node_id']) && $data['node_id'] != '' )
 		{
+			$ext_info = array(
+				'update_type' => 'node_update',
+				'node_data' => $data
+			);
 			// get existing parent node according to the db
 			$node = ee()->taxonomy->get_node( $data['node_id'], 'node_id' );
 
@@ -280,6 +287,11 @@ class Taxonomy_ft extends EE_Fieldtype {
 				// blow your mind.
 				ee()->taxonomy->delete_node($node['lft']);
 				ee()->taxonomy->append_node_last( $parent['lft'], $data );
+
+				$ext_info = array(
+					'update_type' => 'new_parent',
+					'old_parent' => $parent
+				);
 			}
 
 			ee()->taxonomy->update_node($data['node_id'], $data);
@@ -288,13 +300,12 @@ class Taxonomy_ft extends EE_Fieldtype {
 		// inserting a node
 		else
 		{
-			// check if parent is different from previous
+			$ext_info['update_type'] = 'new_node';
 			ee()->taxonomy->append_node_last( $parent['lft'], $data );
-			
 		}
 
 		$tree_array = json_encode( ee()->taxonomy->get_tree_taxonomy() );
-		ee()->taxonomy->update_taxonomy( $tree_array );
+		ee()->taxonomy->update_taxonomy( $tree_array, 'fieldtype_save', $ext_info);
 
 		return '';
 	
