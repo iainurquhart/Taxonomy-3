@@ -4,7 +4,7 @@
 
 Taxonomy 3.0 is a rewrite of 2.0, and includes breaking changes as some of the primary tags behave differently to previous versions. You will *have* to update some template code if you are updating from 2.x. If you want to revert to 2.0, you'll need to reinstate the taxonomy database tables as 3.0 changes the db schema also.
 
-These docs are really loose and are by no means complete, but should be sufficient to get you going with 3.0. Nearly all tag parameters and variables exist using the [2.x docs](http://iain.co.nz/taxonomy/)
+The [official docs](http://iain.co.nz/software/docs/taxonomy-3.x) are a work in progress and I'm getting those up to date now. The following readme will help get you going, too.
 
 #### Main changes
 
