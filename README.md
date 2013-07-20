@@ -24,7 +24,7 @@ These docs are really loose and are by no means complete, but should be sufficie
 
 6. Introduction of a 'taxonomy_updated' extension hook which fires when a tree is updated (allows you to clear caches for example)
 
-7. The taxonomy nav tag can also act as a single tag, meaning a simple unordered list is generated with the full set of existing parameters avaialble to you.
+7. The taxonomy nav tag can also act as a single tag, meaning a simple unordered list is generated with the full set of existing parameters available to you.
 
 ### Code Examples
 
@@ -175,14 +175,14 @@ Full example using Stash
 The taxonomy_updated hook gets fired whenever:
 
 * a node is updated
-* a tree is re-ordered, 
-* a node is deleted, 
-* a branch is deleted, 
+* a tree is re-ordered
+* a node is deleted
+* a branch is deleted
 * an entry with a taxonomy fieldtype is saved
 
 	if (ee()->extensions->active_hook('taxonomy_updated'))
 	{
-	    ee()->extensions->call('taxonomy_updated', $this->tree_id, $update_type, $data);
+		ee()->extensions->call('taxonomy_updated', $this->tree_id, $update_type, $data);
 	}
 
 Update types are:
