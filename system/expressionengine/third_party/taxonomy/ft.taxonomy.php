@@ -135,16 +135,7 @@ class Taxonomy_ft extends EE_Fieldtype {
 		$vars['tree']		= ee()->taxonomy->get_tree();
 		$vars['hide_template'] = TRUE;
 
-		// does this tree have custom fields
-		if(isset($vars['tree']['fields']) && $vars['tree']['fields'] != '')
-		{
-			$vars['tree']['fields'] = json_decode($vars['tree']['fields'], TRUE);
-		}
-		else
-		{
-			$vars['tree']['fields'] = array();
-		}
-
+		
 		// check for field data
 		if(isset($data['field_data']) && $data['field_data'] != '')
 		{

@@ -96,10 +96,7 @@ class Taxonomy_mcp extends Taxonomy_base {
 		{
 			// get our settings
 			$vars['tree'] = ee()->taxonomy->get_tree();
-			if($vars['tree']['fields'] != '')
-			{
-				$vars['tree']['fields'] = json_decode($vars['tree']['fields'], TRUE);
-			}
+
 			// no settings - no tree, bounce the user
 			if( ! $vars['tree'] ) $this->_notify_redirect( 'tx_invalid_tree' );
 		}
@@ -253,10 +250,6 @@ class Taxonomy_mcp extends Taxonomy_base {
 		{	
 			$ret = $this->base_url.AMP.'method=manage_node'.AMP.'tree_id='.ee()->taxonomy->tree_id.AMP.'add_root=1';
 			ee()->functions->redirect($ret);
-		}
-		else
-		{
-			$vars['tree']['taxonomy'] = json_decode($vars['tree']['taxonomy'], TRUE);
 		}
 
 		// add our required js

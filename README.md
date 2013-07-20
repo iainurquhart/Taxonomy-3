@@ -22,6 +22,10 @@ These docs are really loose and are by no means complete, but should be sufficie
 
 5. :next_node and :prev_node are a work in progress. If you're updating and make use of these tags, best wait till they are done.
 
+6. Introduction of a 'taxonomy_updated' extension hook which fires when a tree is updated (allows you to clear caches for example)
+
+7. The taxonomy nav tag can also act as a single tag, meaning a simple unordered list is generated with the full set of existing parameters avaialble to you.
+
 ### Code Examples
 
 Set your current tree so you don't have to keep adding the tree_id parameter, as before. Optionally (and preferably) implicitly declare the current node's entry_id:
@@ -51,6 +55,10 @@ Updated linear :nav tag using own output of wrapper ul and li active, active_par
 	        <a href="{node_url}">{node_title}</a>{children}</li>
 	    {if node_level_count == node_level_total_count}</ul>{/if}
 	{/exp:taxonomy:nav}
+
+Updated :nav tag as a single tag, not a tag pair. Note it's best to supply an additional operator on the :nav incase you are using the :nav pair elsehwere in your template
+
+	{exp:taxonomy:nav:single tree_id="2"}
 
 --
 
@@ -161,6 +169,28 @@ Full example using Stash
 	{/exp:channel:entries}
 
 --
+
+### 'taxonomy_updated' Extension hook
+
+The taxonomy_updated hook gets fired whenever:
+
+* a node is updated
+* a tree is re-ordered, 
+* a node is deleted, 
+* a branch is deleted, 
+* an entry with a taxonomy fieldtype is saved
+
+	if (ee()->extensions->active_hook('taxonomy_updated'))
+	{
+	    ee()->extensions->call('taxonomy_updated', $this->tree_id, $update_type, $data);
+	}
+
+Update types are:
+
+* 'update_node', $data gives you details of the node that got updated
+* 'reorder_nodes', $data gives you an array of the updated tree structure
+* 'delete_branch' and 'delete_node', $data gives you an array of the node that got deleted. Both are essentially the same except delete branch just flags that the node was a parent and there would have been children deleted also.
+* 'fieldtype_save', $data gives you an indication of what was updated when the Taxonomy fieldtype's save method was called.
 
 ### Installing/Updating
 Please review the following instructions: 

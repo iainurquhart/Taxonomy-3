@@ -136,7 +136,9 @@ class Taxonomy_model extends Taxonomy_base
 			$data['templates'] = ($data['templates']) ? explode('|', $data['templates']) : array();
 			$data['channels'] = ($data['channels']) ? explode('|', $data['channels']) : array();
 			$data['member_groups'] = ($data['member_groups']) ? explode('|', $data['member_groups']) : array();
-			
+			$data['fields'] = ($data['fields']) ? json_decode($data['fields'], TRUE) : '';
+			$data['taxonomy'] = ($data['taxonomy']) ? json_decode($data['taxonomy'], TRUE) : '';
+
     		$this->cache['trees'][$this->tree_id] = $data;
 
     	}
@@ -186,8 +188,18 @@ class Taxonomy_model extends Taxonomy_base
     				$node['type'] = array();
     			}
 
+    			if($node['field_data'] != '')
+    			{
+    				$node['field_data'] = json_decode($node['field_data'], TRUE);
+    				foreach($node['field_data'] as $k => $v)
+    				{
+    					$node[$k] = $v;
+    				}
+    			}
+
     			$node_data[ $node['node_id'] ] = $node;
     			$node_data[ $node['node_id'] ]['url'] = $this->build_url($node);
+    			
     		}
 
     		$this->cache['trees'][$this->tree_id]['nodes']['by_node_id'] = $node_data;
@@ -498,6 +510,25 @@ class Taxonomy_model extends Taxonomy_base
 			)->result_array();
 		}
 		return $siblings;
+	}
+
+	// --------------------------------------------------------------------
+
+	/**
+	 * Returns the entry_id of an entry by url_title
+	 * @param url_title
+	 * @return int entry_id,
+	 * but if no rows returned, false
+	 */
+	function entry_id_from_url_title($url_title)
+	{
+        ee()->db->where('url_title', $url_title)->limit(1);
+        $entry = ee()->db->get('channel_titles')->row_array();            
+        if($entry)
+        {
+            return $entry['entry_id'];
+        }
+        return false;
 	}
 
 	// ------------------------------------------------------------------------

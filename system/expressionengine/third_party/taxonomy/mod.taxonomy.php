@@ -65,6 +65,10 @@ class Taxonomy extends Taxonomy_base {
 	);
 
 	private $vars = array();
+
+	private $default_nav_tagdata = "\n<li{if node_active} class='active'{/if}><a href='{node_url}'>{node_title}</a>{children}</li>\n";
+
+	private $default_breadcrumbs_tagdata = " {if here}{node_title}{if:else}<a href='{node_url}'>{node_title}</a> {node_delimiter} {/if}";
 	
 	
 
@@ -150,17 +154,23 @@ class Taxonomy extends Taxonomy_base {
 
 		ee()->taxonomy->set_table( $tree_id );
 
+		if(ee()->TMPL->tagdata == '')
+		{
+			ee()->TMPL->tagdata = $this->default_breadcrumbs_tagdata;
+		}
+
 		$display_root 	= $this->get_param('display_root', 'yes');
 		$include_here 	= $this->get_param('include_here');
 		$reverse 		= $this->get_param('reverse', 'no');
 		$title_field 	= $this->get_param('title_field', 'node_title');
 		$wrap_ul 		= $this->get_param('wrap_ul', 'no');
+		$delimiter 		= $this->get_param('delimiter', '&rarr;');
 
 		$this->return_data = $here = '';
 		$depth = 0;	
 
 		// load what we need
-		ee()->taxonomy->get_tree();
+		$tree = ee()->taxonomy->get_tree();
 		ee()->taxonomy->get_nodes(); // loads the session array with node data
 
 		$node_cache = (isset($this->cache['trees'][$tree_id]['nodes'])) ? $this->cache['trees'][$tree_id]['nodes'] : array();
@@ -218,25 +228,37 @@ class Taxonomy extends Taxonomy_base {
 			'node_entry_expiration_date' => $this_node['expiration_date'],
 			'node_entry_template_name' => '',
 			'node_entry_template_group_name' => '',
-			'node_has_children' => (isset($this_node['children'])) ? 1 : 0,
+			'node_has_children' => (isset($this_node['children'])) ? 'yes' : 0,
 			'node_next_child' => $this_node['lft']+1,
 			'here' => 1,
 			'not_here' => '',
 			'node_count' => count($parents)+1,
 			'node_total_count' => count($parents)+1,
-			'node_level' => count($parents)
+			'node_level' => count($parents),
+			'node_delimiter' => $delimiter
 		);
+
+		if(count($tree['fields']))
+		{
+			foreach($tree['fields'] as $field)
+			{
+				$field_data = (isset($this_node_vars['node_field_data'][$field['name']])) ? $this_node_vars['node_field_data'][$field['name']] : '';
+				$this_node_vars[ $field['name'] ] = $field_data;
+			}
+		}
 
 		$vars = array();
 
 		if(count($parents))
-		{		
+		{	
+			$i = 0;
 			foreach($parents as $key => $p_id)
 			{
+				
 				if((isset($node_cache['by_node_id'][$p_id])))
 				{
 					$att = $node_cache['by_node_id'][$p_id];
-					$vars[] = array(
+					$vars[$i] = array(
 						'node_id' => $att['node_id'],
 						'node_title' => $att['label'],
 						'node_url' => $att['url'],
@@ -253,14 +275,25 @@ class Taxonomy extends Taxonomy_base {
 						'node_entry_expiration_date' => $att['expiration_date'],
 						'node_entry_template_name' => '',
 						'node_entry_template_group_name' => '',
-						'node_has_children' => (isset($node['children'])) ? 1 : 0,
+						'node_has_children' => (isset($node['children'])) ? 'yes' : 0,
 						'node_next_child' => $att['lft']+1,
 						'here' => '',
 						'not_here' => 1,
 						'node_count' => $key+1,
 						'node_total_count' => count($parents)+1,
-						'node_level' => $key
+						'node_level' => $key,
+						'node_delimiter' => $delimiter
 					);
+					
+					if(count($tree['fields']))
+					{
+						foreach($tree['fields'] as $field)
+						{
+							$field_data = (isset($att['field_data'][$field['name']])) ? $att['field_data'][$field['name']] : '';
+							$vars[$i][ $field['name'] ] = $field_data;
+						}
+					}
+					$i++;
 				}
 			}
 			$vars[] = $this_node_vars; // append our current
@@ -269,6 +302,8 @@ class Taxonomy extends Taxonomy_base {
 		{
 			$vars[] = $this_node_vars; // no parents, just our current node then
 		}
+
+		// print_r($vars);
 
 		if($display_root == 'no')
 		{
@@ -341,7 +376,12 @@ class Taxonomy extends Taxonomy_base {
 
 		ee()->load->model('taxonomy_model', 'taxonomy');
 		ee()->load->helper('url');
-		
+
+		if(ee()->TMPL->tagdata == '')
+		{
+			ee()->TMPL->tagdata = $this->default_nav_tagdata;
+		}
+
 		if( ee()->taxonomy->set_table( $tree_id ) === FALSE )
 		{
 			ee()->TMPL->log_item("TAXONOMY:NAV: Returning NULL; Tree requested does not exist.");
@@ -366,13 +406,12 @@ class Taxonomy extends Taxonomy_base {
 			'ul_css_id' => $this->get_param('ul_css_id'),
 			'ul_css_class' => $this->get_param('ul_css_class'),
 			'hide_dt_group' => $this->get_param('hide_dt_group'),
-			'url_title' => $this->get_param('url_title'),
+			'root_node_url_title' => $this->get_param('root_node_url_title'),
 			'auto_expand' => $this->get_param('auto_expand', 'no'),
 			'style' => $this->get_param('style', 'nested'),
 			'path' => '',
 			'entry_status' => ($this->get_param('entry_status') ) ? explode('|', $this->get_param('entry_status')) : array('open'),
 			'active_branch_start_level' => $this->get_param('active_branch_start_level', 0),
-			'node_active_class' => $this->get_param('node_active_class', 'active'),
 			'site_id' => $this->get_param('site_id', ee()->config->item('site_id')),
 			'require_valid_entry_id' => $this->get_param('require_valid_entry_id', FALSE),
 			'html_before' => $this->get_param('html_before', ''),
@@ -387,7 +426,6 @@ class Taxonomy extends Taxonomy_base {
 			'show_expired' => $this->get_param('show_expired', 'no'),
 			'template_path' => $this->get_param('template_path', ''),
 			'use_custom_url' => $this->get_param('use_custom_url', 'no'),
-			'li_has_children_class' => $this->get_param('li_has_children_class', 'has_children'),
 			'parents' => array(),
 			'list_type' => $this->get_param('list_type', 'ul'),
 			'field_keys' => array(),
@@ -425,9 +463,8 @@ class Taxonomy extends Taxonomy_base {
 
 		// setup default values for our taxonomy custom fields
 		// --------------------------------------------------
-		if($tree['fields'] != '')
+		if(count($tree['fields']))
 		{
-			$tree['fields'] = json_decode($tree['fields'], TRUE);
 			foreach($tree['fields'] as $field)
 			{
 				$params['field_keys'][$field['name']] = '';
@@ -437,6 +474,11 @@ class Taxonomy extends Taxonomy_base {
 		}
 		// --------------------------------------------------
 
+		// getting root node by url_title?
+		if($params['root_node_url_title'])
+		{
+			$params['root_node_entry_id'] = ee()->taxonomy->entry_id_from_url_title($params['root_node_url_title']);
+		}
 
 		// Assertain current node
 		// --------------------------------------------------
@@ -468,7 +510,7 @@ class Taxonomy extends Taxonomy_base {
 		elseif($node_id)
 		{
 			$this_node = (isset($node_cache['by_node_id'][$node_id])) ? $node_cache['by_node_id'][$node_id] : '';
-			$params['node_id'] = $this_node['node_id'];
+			$params['node_id'] = (isset($this_node['node_id'])) ? $this_node['node_id'] : '';
 		}
 		// by url matching
 		elseif(isset($node_cache['by_node_id']) && is_array($node_cache['by_node_id']))
@@ -498,10 +540,10 @@ class Taxonomy extends Taxonomy_base {
 
 
 		// do we have a tree array
-		if(!is_array($tree['taxonomy']) && $tree['taxonomy'] != '')
+		if(is_array($tree['taxonomy']))
 		{
 
-			$tree = json_decode($tree['taxonomy'], TRUE);
+			$tree = $tree['taxonomy'];
 
 			// auto expand requires us to find lft/right of all parents
 			// @todo: should just refactor this by expanding the $params['parents'] array.
@@ -603,6 +645,11 @@ class Taxonomy extends Taxonomy_base {
 		// reset the node_count as multiple trees may be output
 		if (isset(ee()->session->cache['taxonomy_node_count'])){ee()->session->cache['taxonomy_node_count'] = 1;}
 
+		if($r)
+		{
+			$r = $params['html_before'].$r.$params['html_after'];
+		}
+
 		return $r;
 
 	}
@@ -682,9 +729,9 @@ class Taxonomy extends Taxonomy_base {
 			{
 				if($key == 'field_data' && $val != '')
 				{
-					 $val = array(json_decode($val, TRUE));
+					 $val = array($val);
 				}
-				$vars[$direction.'_'.$key] = $val;
+				$vars[$direction.'_node_'.$key] = $val;
 			}
 		}
 
@@ -937,7 +984,7 @@ class Taxonomy extends Taxonomy_base {
 
 		ee()->load->model('taxonomy_model', 'taxonomy');
 		ee()->taxonomy->set_table( $tree_id );
-		ee()->taxonomy->get_tree();
+		$tree = ee()->taxonomy->get_tree();
 		ee()->taxonomy->get_nodes();
 
 		// shortcut ref to our tree's node data
@@ -1020,6 +1067,14 @@ class Taxonomy extends Taxonomy_base {
 				$var_prefix.'node_url' => (isset($node['url'])) ? $node['url'] : ''
 			);
 
+			if(count($tree['fields']))
+			{
+				foreach ($tree['fields'] as $field) 
+				{
+					$vars[$var_prefix.$field['name']] = (isset($node['field_data'][$field['name']])) ? $node['field_data'][$field['name']] : '';
+				}
+			}
+
 			$parent = (isset($this->cache['trees'][$tree_id]['nodes']['by_node_id'][ $node['parent'] ])) 
 						? $this->cache['trees'][$tree_id]['nodes']['by_node_id'][ $node['parent'] ] : '';
 
@@ -1047,9 +1102,17 @@ class Taxonomy extends Taxonomy_base {
 				$var_prefix.'parent_node_level+2' => (isset($parent['depth'])) ? $parent['depth']+2 : '',
 				$var_prefix.'parent_node_level-1' => (isset($parent['depth'])) ? $parent['depth']-1 : '',
 				$var_prefix.'parent_node_level-2' => (isset($parent['depth'])) ? $parent['depth']-2 : '',
-				$var_prefix.'parent_node_has_children' => 1, // duh
+				$var_prefix.'parent_node_has_children' => 'yes', // duh
 				$var_prefix.'parent_node_url' => (isset($parent['url'])) ? $parent['url'] : ''
 			);
+
+			if(count($tree['fields']))
+			{
+				foreach ($tree['fields'] as $field) 
+				{
+					$vars[$var_prefix.'parent_'.$field['name']] = (isset($parent['field_data'][$field['name']])) ? $parent['field_data'][$field['name']] : '';
+				}
+			}
 
 			$tagdata = ee()->TMPL->tagdata;
 
@@ -1101,6 +1164,15 @@ class Taxonomy extends Taxonomy_base {
 
     		if($level_count == 1 && $params['include_ul'] == 'yes' && $params['style'] == 'nested') 
 			{
+
+				// reset the css ID or apply the level css_id
+    			$params['ul_css_id'] = (isset($params['ul_css_id:level_'.$node['level']]))
+    											? $params['ul_css_id:level_'.$node['level']] : '';
+
+    			$params['ul_css_class'] = (isset($params['ul_css_class:level_'.$node['level']]))
+    											? $params['ul_css_class:level_'.$node['level']] : '';
+
+
 				$ul_css_id = ($params['ul_css_id'] != '') ? ' id="'.$params['ul_css_id'].'"' : '';
 				$ul_css_class = ($params['ul_css_class'] != '') ? ' class="'.$params['ul_css_class'].'"' : '';
 				$str = "\n<".$params['list_type'].$ul_css_id.$ul_css_class.'>';
@@ -1116,12 +1188,7 @@ class Taxonomy extends Taxonomy_base {
     			$active = '';
     			$active_parent = '';
 
-    			// reset the css ID or apply the level css_id
-    			$params['ul_css_id'] = (isset($params['ul_css_id:level_'.$node['level']]))
-    											? $params['ul_css_id:level_'.$node['level']] : '';
-
-    			$params['ul_css_class'] = (isset($params['ul_css_class:level_'.$node['level']]))
-    											? $params['ul_css_class:level_'.$node['level']] : '';
+    			
 
     			// flag the active class
     			if($params['entry_id'] != '' && $params['entry_id'] != "{entry_id}") // there's always some tit.
@@ -1152,7 +1219,7 @@ class Taxonomy extends Taxonomy_base {
 					'node_rgt' => $att['rgt'],
 					'node_entry_id' => $att['entry_id'],
 					'node_custom_url' => $att['custom_url'],
-					'node_field_data' => $att['field_data'],
+					// 'node_field_data' => $att['field_data'],
 					'node_entry_title' => $att['title'],
 					'node_entry_url_title' => $att['url_title'],
 					'node_entry_status' => $att['status'],
@@ -1160,7 +1227,7 @@ class Taxonomy extends Taxonomy_base {
 					'node_entry_expiration_date' => $att['expiration_date'],
 					'node_entry_template_name' => '', // @todo
 					'node_entry_template_group_name' => '', // @todo
-					'node_has_children' => (isset($node['children'])) ? 1 : 0,
+					'node_has_children' => (isset($node['children'])) ? 'yes' : 0,
 					'node_next_child' => $att['lft']+1,
 					'node_level' => $node['level'],
 					'node_level_count' => $level_count,
@@ -1174,9 +1241,8 @@ class Taxonomy extends Taxonomy_base {
 				$vars += $params['field_keys'];
 
 				// if values exist, swap 'em out
-				if($att['field_data'] != '' && !is_array($att['field_data']))
+				if($att['field_data'] != '' && is_array($att['field_data']))
 				{
-					$att['field_data'] = json_decode($att['field_data'], TRUE);
 					foreach($att['field_data'] as $key => $field)
 					{
 						$vars[$key] = $field;
