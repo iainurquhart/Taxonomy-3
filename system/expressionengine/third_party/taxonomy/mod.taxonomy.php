@@ -228,7 +228,6 @@ class Taxonomy extends Taxonomy_base {
 			'node_entry_expiration_date' => $this_node['expiration_date'],
 			'node_entry_template_name' => '',
 			'node_entry_template_group_name' => '',
-			'node_has_children' => (isset($this_node['children'])) ? 'yes' : 0,
 			'node_next_child' => $this_node['lft']+1,
 			'here' => 1,
 			'not_here' => '',
@@ -258,6 +257,7 @@ class Taxonomy extends Taxonomy_base {
 				if((isset($node_cache['by_node_id'][$p_id])))
 				{
 					$att = $node_cache['by_node_id'][$p_id];
+
 					$vars[$i] = array(
 						'node_id' => $att['node_id'],
 						'node_title' => $att['label'],
@@ -275,7 +275,6 @@ class Taxonomy extends Taxonomy_base {
 						'node_entry_expiration_date' => $att['expiration_date'],
 						'node_entry_template_name' => '',
 						'node_entry_template_group_name' => '',
-						'node_has_children' => (isset($node['children'])) ? 'yes' : 0,
 						'node_next_child' => $att['lft']+1,
 						'here' => '',
 						'not_here' => 1,
@@ -1047,7 +1046,7 @@ class Taxonomy extends Taxonomy_base {
 				$var_prefix.'node_label' => (isset($node['label'])) ? $node['label'] : '',
 				$var_prefix.'node_entry_id' => (isset($node['entry_id'])) ? $node['entry_id'] : '',
 				$var_prefix.'node_template_id' => (isset($node['template_path'])) ? $node['template_path'] : '',
-				$var_prefix.'node_field_data' => (isset($node['field_data'])) ? $node['field_data'] : '',
+				// $var_prefix.'node_field_data' => (isset($node['field_data'])) ? $node['field_data'] : '',
 				$var_prefix.'node_status' => (isset($node['status'])) ? $node['status'] : '',
 				$var_prefix.'node_highlight' => (isset($node['highlight'])) ? $node['highlight'] : '',
 				$var_prefix.'node_title' => (isset($node['title'])) ? $node['title'] : '',
@@ -1086,7 +1085,7 @@ class Taxonomy extends Taxonomy_base {
 				$var_prefix.'parent_node_label' => (isset($parent['label'])) ? $parent['label'] : '',
 				$var_prefix.'parent_node_entry_id' => (isset($parent['entry_id'])) ? $parent['entry_id'] : '',
 				$var_prefix.'parent_node_template_id' => (isset($parent['template_path'])) ? $parent['template_path'] : '',
-				$var_prefix.'parent_node_field_data' => (isset($parent['field_data'])) ? $parent['field_data'] : '',
+				// $var_prefix.'parent_node_field_data' => (isset($parent['field_data'])) ? $parent['field_data'] : '',
 				$var_prefix.'parent_node_status' => (isset($parent['status'])) ? $parent['status'] : '',
 				$var_prefix.'parent_node_highlight' => (isset($parent['highlight'])) ? $parent['highlight'] : '',
 				$var_prefix.'parent_node_title' => (isset($parent['title'])) ? $parent['title'] : '',
