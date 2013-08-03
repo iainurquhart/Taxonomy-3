@@ -70,7 +70,17 @@ class Taxonomy extends Taxonomy_base {
 
 	private $default_breadcrumbs_tagdata = " {if here}{node_title}{if:else}<a href='{node_url}'>{node_title}</a> {node_delimiter} {/if}";
 	
-	
+	/**
+	 * Constructor
+	 *
+	 * @access     public
+	 * @return     void
+	 */
+	public function __construct()
+	{
+		parent::__construct();
+		ee()->load->model('taxonomy_model', 'taxonomy');
+	}
 
 	// --------------------------------------------------------------------
 	//  P U B L I C   M E T H O D S
@@ -99,8 +109,6 @@ class Taxonomy extends Taxonomy_base {
 
 		if(!$tree_id || (!$node_id && !$entry_id))
 			return '';
-
-		ee()->load->model('taxonomy_model');
 
 		if( ee()->taxonomy->set_table( $tree_id ) === FALSE )
 		{
@@ -150,9 +158,11 @@ class Taxonomy extends Taxonomy_base {
 		if(!$tree_id)
 			return NULL;
 
-		ee()->load->model('taxonomy_model', 'taxonomy');
-
-		ee()->taxonomy->set_table( $tree_id );
+		if( ee()->taxonomy->set_table( $tree_id ) === FALSE )
+		{
+			ee()->TMPL->log_item("TAXONOMY:NAV: Returning NULL; Tree requested does not exist.");
+			return '';
+		} 
 
 		if(ee()->TMPL->tagdata == '')
 		{
@@ -373,7 +383,6 @@ class Taxonomy extends Taxonomy_base {
 		$use_relative 	= $this->get_param('use_relative', FALSE);
 		$url_base 		= ($use_relative === FALSE) ? $this->site_url : '';
 
-		ee()->load->model('taxonomy_model', 'taxonomy');
 		ee()->load->helper('url');
 
 		if(ee()->TMPL->tagdata == '')
@@ -675,6 +684,12 @@ class Taxonomy extends Taxonomy_base {
 		if(!$tree_id || (!$entry_id && !$entry_id))
 			return '';
 
+		if( ee()->taxonomy->set_table( $tree_id ) === FALSE )
+		{
+			ee()->TMPL->log_item("TAXONOMY:NAV: Returning NULL; Tree requested does not exist.");
+			return '';
+		} 
+
 		// load what we need from the tree structure
 		$tree = ee()->taxonomy->get_tree();
 		ee()->taxonomy->get_nodes(); // loads the session array with node data
@@ -764,6 +779,12 @@ class Taxonomy extends Taxonomy_base {
 		if(!$tree_id || !$entry_id)
 			return '';
 
+		if( ee()->taxonomy->set_table( $tree_id ) === FALSE )
+		{
+			ee()->TMPL->log_item("TAXONOMY:NAV: Returning NULL; Tree requested does not exist.");
+			return '';
+		} 
+
 		$r = array();
 
 		// load what we need from the tree structure
@@ -801,6 +822,12 @@ class Taxonomy extends Taxonomy_base {
 		// no tree, no partay.
 		if(!$tree_id)
 			return '';
+
+		if( ee()->taxonomy->set_table( $tree_id ) === FALSE )
+		{
+			ee()->TMPL->log_item("TAXONOMY:NAV: Returning NULL; Tree requested does not exist.");
+			return '';
+		} 
 
 		$entry_id 		= $this->_get_this('entry_id');
 		$node_id 		= $this->_get_this('node_id');
@@ -907,6 +934,12 @@ class Taxonomy extends Taxonomy_base {
 		if(!$tree_id)
 			return '';
 
+		if( ee()->taxonomy->set_table( $tree_id ) === FALSE )
+		{
+			ee()->TMPL->log_item("TAXONOMY:NAV: Returning NULL; Tree requested does not exist.");
+			return '';
+		} 
+
 		$entry_id 		= $this->_get_this('entry_id');
 		$node_id 		= $this->_get_this('node_id');
 		
@@ -985,8 +1018,12 @@ class Taxonomy extends Taxonomy_base {
 		else
 			return NULL; // no tree_id no partay
 
-		ee()->load->model('taxonomy_model', 'taxonomy');
-		ee()->taxonomy->set_table( $tree_id );
+		if( ee()->taxonomy->set_table( $tree_id ) === FALSE )
+		{
+			ee()->TMPL->log_item("TAXONOMY:NAV: Returning NULL; Tree requested does not exist.");
+			return '';
+		} 
+		
 		$tree = ee()->taxonomy->get_tree();
 		ee()->taxonomy->get_nodes();
 
