@@ -229,7 +229,7 @@ class Taxonomy_ft extends EE_Fieldtype {
 			'update_type' => 'no_node_data'
 		);
 
-		if(!$data['label']) return '';
+		if(!isset($data['label']) || !$data['label']) return '';
 
 		ee()->load->model('taxonomy_model', 'taxonomy');
 		ee()->taxonomy->set_table( $data['tree_id'] );
