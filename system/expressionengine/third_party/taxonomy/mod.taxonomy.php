@@ -237,7 +237,7 @@ class Taxonomy extends Taxonomy_base {
 			'node_delimiter' => $delimiter
 		);
 
-		if(count($tree['fields']))
+		if(!empty($tree['fields']) && is_array($tree['fields']))
 		{
 			foreach($tree['fields'] as $field)
 			{
@@ -284,7 +284,7 @@ class Taxonomy extends Taxonomy_base {
 						'node_delimiter' => $delimiter
 					);
 					
-					if(count($tree['fields']))
+					if(!empty($tree['fields']) && is_array($tree['fields']))
 					{
 						foreach($tree['fields'] as $field)
 						{
@@ -462,7 +462,7 @@ class Taxonomy extends Taxonomy_base {
 
 		// setup default values for our taxonomy custom fields
 		// --------------------------------------------------
-		if(count($tree['fields']))
+		if(!empty($tree['fields']) && is_array($tree['fields']))
 		{
 			foreach($tree['fields'] as $field)
 			{
@@ -900,8 +900,7 @@ class Taxonomy extends Taxonomy_base {
 
 	}
 
-
-	public function get_children_ids()
+	public function child_entry_ids()
 	{
 		$tree_id 		= $this->_get_this('tree_id');
 
@@ -923,7 +922,7 @@ class Taxonomy extends Taxonomy_base {
 		}
 		else
 		{
-			return '';
+			return 'asdsa';
 		}
 
 		// load what we need from the tree structure
@@ -951,7 +950,12 @@ class Taxonomy extends Taxonomy_base {
 		}
 
 		return implode('|', $ids);
+	}
 
+
+	public function get_children_ids()
+	{
+		return $this->child_entry_ids();
 	}
 	
 
