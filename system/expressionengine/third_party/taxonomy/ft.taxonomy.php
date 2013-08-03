@@ -139,7 +139,7 @@ class Taxonomy_ft extends EE_Fieldtype {
 		// check for field data
 		if(isset($data['field_data']) && $data['field_data'] != '')
 		{
-			$vars['data']['field_data'] = json_decode($data['field_data'], TRUE);
+			$vars['data']['field_data'] = (is_array($data['field_data'])) ? $data['field_data'] : json_decode($data['field_data'], TRUE);
 		}
 		
 		// build our parent select field
