@@ -441,6 +441,8 @@ class Taxonomy extends Taxonomy_base {
 		);
 		// --------------------------------------------------
 
+
+
 		
 		// per-level parameters / Cheers Rob Sanchez (@_rsan)
 		// --------------------------------------------------
@@ -463,6 +465,8 @@ class Taxonomy extends Taxonomy_base {
 			}
 		}
 		// --------------------------------------------------
+
+
 
 
 		// load what we need
@@ -561,6 +565,8 @@ class Taxonomy extends Taxonomy_base {
 			}
 
 
+
+
 			// are we starting somewhere down the tree?
 			// --------------------------------------------------
 			if($params['active_branch_start_level'] > 0 && $this_node != '')
@@ -634,6 +640,7 @@ class Taxonomy extends Taxonomy_base {
 				$tree = ee()->taxonomy->get_tree_taxonomy($node);
 			}
 			// --------------------------------------------------
+
 
 
 			// --------------------------------------------------
@@ -1188,6 +1195,9 @@ class Taxonomy extends Taxonomy_base {
 		
 		$tree_id = ee()->taxonomy->tree_id;
 
+		exit($params['ul_css_class']);
+
+
 		// filter out nodes we don't want from this level
 		$taxonomy = $this->_pre_process_level($taxonomy, $params);
 
@@ -1205,17 +1215,20 @@ class Taxonomy extends Taxonomy_base {
     		if($level_count == 1 && $params['include_ul'] == 'yes' && $params['style'] == 'nested') 
 			{
 
-				// reset the css ID or apply the level css_id
-    			$params['ul_css_id'] = (isset($params['ul_css_id:level_'.$node['level']]))
-    											? $params['ul_css_id:level_'.$node['level']] : '';
+				if(isset($params['ul_css_id:level_'.$node['level']]))
+				{
+					$params['ul_css_id'] = $params['ul_css_id:level_'.$node['level']])
+				}
 
-    			$params['ul_css_class'] = (isset($params['ul_css_class:level_'.$node['level']]))
-    											? $params['ul_css_class:level_'.$node['level']] : '';
-
+				if(isset($params['ul_css_class:level_'.$node['level']]))
+				{
+					$params['ul_css_class'] = $params['ul_css_class:level_'.$node['level']])
+				}
 
 				$ul_css_id = ($params['ul_css_id'] != '') ? ' id="'.$params['ul_css_id'].'"' : '';
 				$ul_css_class = ($params['ul_css_class'] != '') ? ' class="'.$params['ul_css_class'].'"' : '';
 				$str = "\n<".$params['list_type'].$ul_css_id.$ul_css_class.'>';
+
 			}
     		// set the default vars
     		$vars = $this->node_vars;
