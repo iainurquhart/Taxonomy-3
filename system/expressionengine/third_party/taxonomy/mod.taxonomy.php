@@ -1195,9 +1195,6 @@ class Taxonomy extends Taxonomy_base {
 		
 		$tree_id = ee()->taxonomy->tree_id;
 
-		exit($params['ul_css_class']);
-
-
 		// filter out nodes we don't want from this level
 		$taxonomy = $this->_pre_process_level($taxonomy, $params);
 
