@@ -845,7 +845,8 @@ class Taxonomy extends Taxonomy_base {
 			foreach(ee()->TMPL->var_single as $key => $var)
 			{
 				$new_key = str_replace('tx:', '', $key);
-				ee()->TMPL->var_single[$new_key] = $new_key;
+				$new_var = str_replace('tx:', '', $var);
+				ee()->TMPL->var_single[$new_key] = $new_var;
 				unset(ee()->TMPL->var_single[$key]);
 			}
 		}
@@ -857,7 +858,8 @@ class Taxonomy extends Taxonomy_base {
 			foreach(ee()->TMPL->var_pair as $key => $var)
 			{
 				$new_key = str_replace('tx:', '', $key);
-				ee()->TMPL->var_pair[$new_key] = $var;
+				$new_var = str_replace('tx:', '', $var);
+				ee()->TMPL->var_pair[$new_key] = $new_var;
 				unset(ee()->TMPL->var_pair[$key]);
 			}
 		}
