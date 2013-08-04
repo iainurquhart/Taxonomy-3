@@ -1217,12 +1217,12 @@ class Taxonomy extends Taxonomy_base {
 
 				if(isset($params['ul_css_id:level_'.$node['level']]))
 				{
-					$params['ul_css_id'] = $params['ul_css_id:level_'.$node['level']]);
+					$params['ul_css_id'] = $params['ul_css_id:level_'.$node['level']];
 				}
 
 				if(isset($params['ul_css_class:level_'.$node['level']]))
 				{
-					$params['ul_css_class'] = $params['ul_css_class:level_'.$node['level']]);
+					$params['ul_css_class'] = $params['ul_css_class:level_'.$node['level']];
 				}
 
 				$ul_css_id = ($params['ul_css_id'] != '') ? ' id="'.$params['ul_css_id'].'"' : '';
