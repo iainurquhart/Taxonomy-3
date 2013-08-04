@@ -1212,12 +1212,13 @@ class Taxonomy extends Taxonomy_base {
     		if($level_count == 1 && $params['include_ul'] == 'yes' && $params['style'] == 'nested') 
 			{
 
-				if(isset($params['ul_css_id:level_'.$node['level']]))
+				if(isset($params['ul_css_id:level_'.$node['level']]) && $params['ul_css_id:level_'.$node['level']] != '')
 				{
+
 					$params['ul_css_id'] = $params['ul_css_id:level_'.$node['level']];
 				}
 
-				if(isset($params['ul_css_class:level_'.$node['level']]))
+				if(isset($params['ul_css_class:level_'.$node['level']]) && $params['ul_css_class:level_'.$node['level']] != '')
 				{
 					$params['ul_css_class'] = $params['ul_css_class:level_'.$node['level']];
 				}
@@ -1225,6 +1226,9 @@ class Taxonomy extends Taxonomy_base {
 				$ul_css_id = ($params['ul_css_id'] != '') ? ' id="'.$params['ul_css_id'].'"' : '';
 				$ul_css_class = ($params['ul_css_class'] != '') ? ' class="'.$params['ul_css_class'].'"' : '';
 				$str = "\n<".$params['list_type'].$ul_css_id.$ul_css_class.'>';
+
+				// reset outer parameters.
+				$params['ul_css_class'] = $params['ul_css_id'] = '';
 
 			}
     		// set the default vars
