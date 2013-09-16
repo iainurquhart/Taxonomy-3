@@ -777,6 +777,12 @@ class Taxonomy_model extends Taxonomy_base
 		$data['depth'] = 0;
 		$data = array_merge( $data, array('lft' => 1, 'rgt' => 2) );
 		unset($data['node_id']);
+
+		if(!isset($data['moved']))
+		{
+			$data['moved'] = 0;
+		}
+		
 		ee()->db->insert( $this->tree_table, $data );
 		$this->_unlock_tree_table();
 		return true;
@@ -817,6 +823,12 @@ class Taxonomy_model extends Taxonomy_base
 		
 		$data = array_merge( $data, array('lft' => $lft, 'rgt' => $lft+1) );
 		unset($data['node_id']);
+
+		if(!isset($data['moved']))
+		{
+			$data['moved'] = 0;
+		}
+
 		ee()->db->insert( $this->tree_table, $data );
 		
 		if ($lock)
