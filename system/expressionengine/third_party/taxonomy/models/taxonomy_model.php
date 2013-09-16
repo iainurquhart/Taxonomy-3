@@ -985,6 +985,15 @@ class Taxonomy_model extends Taxonomy_base
 	function update_node( $node_id, $data )
 	{
 		$data = $this->_sanitize_data($data);
+
+		// no custom field data, set to null
+		// fixes bug when only checkboxes are used and no
+		// data is submitted.
+		if(!isset($data['field_data']))
+		{
+			$data['field_data'] = '';
+		}
+
 		// Make the update
 		ee()->db->where( 'node_id', $node_id );
 		ee()->db->update( $this->tree_table, $data );
