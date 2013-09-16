@@ -39,6 +39,7 @@ class Taxonomy extends Taxonomy_base {
 		'node_relative_url' => '',
 		'node_active' => '',
 		'node_active_parent' => '',
+		'node_active_class' => '',
 		'node_lft' => '',
 		'node_rgt' => '',
 		'node_entry_id' =>  '',
@@ -1265,6 +1266,8 @@ class Taxonomy extends Taxonomy_base {
     				$active_parent = 'active_parent';
     			}
 
+
+
     			$vars = array(
 					'node_id' => $att['node_id'],
 					'node_title' => $att['label'],
@@ -1272,6 +1275,7 @@ class Taxonomy extends Taxonomy_base {
 					'node_relative_url' => '', // @todo
 					'node_active' => $active,
 					'node_active_parent' => $active_parent,
+					'node_active_class' => ($active) ? $active : $active_parent,
 					'node_lft' => $att['lft'],
 					'node_rgt' => $att['rgt'],
 					'node_entry_id' => $att['entry_id'],
