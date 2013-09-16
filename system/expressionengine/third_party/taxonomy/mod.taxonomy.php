@@ -233,8 +233,8 @@ class Taxonomy extends Taxonomy_base {
 			'node_field_data' => $this_node['field_data'],
 			'node_entry_title' => $this_node['title'],
 			'node_entry_url_title' => $this_node['url_title'],
-			'node_entry_status' => $this_node['url'],
-			'node_entry_entry_date' => $this_node['status'],
+			'node_entry_status' => $this_node['status'],
+			'node_entry_entry_date' => $this_node['entry_date'],
 			'node_entry_expiration_date' => $this_node['expiration_date'],
 			'node_entry_template_name' => '',
 			'node_entry_template_group_name' => '',
@@ -280,8 +280,8 @@ class Taxonomy extends Taxonomy_base {
 						'node_field_data' => $att['field_data'],
 						'node_entry_title' => $att['title'],
 						'node_entry_url_title' => $att['url_title'],
-						'node_entry_status' => $att['url'],
-						'node_entry_entry_date' => $att['status'],
+						'node_entry_status' => $att['status'],
+						'node_entry_entry_date' => $att['entry_date'],
 						'node_entry_expiration_date' => $att['expiration_date'],
 						'node_entry_template_name' => '',
 						'node_entry_template_group_name' => '',
@@ -311,8 +311,6 @@ class Taxonomy extends Taxonomy_base {
 		{
 			$vars[] = $this_node_vars; // no parents, just our current node then
 		}
-
-		// print_r($vars);
 
 		if($display_root == 'no')
 		{
@@ -1159,7 +1157,10 @@ class Taxonomy extends Taxonomy_base {
 			{
 				foreach ($tree['fields'] as $field) 
 				{
-					$vars[$var_prefix.'parent_'.$field['name']] = (isset($parent['field_data'][$field['name']])) ? $parent['field_data'][$field['name']] : '';
+					if(isset($parent['field_data']))
+					{
+						$vars[$var_prefix.'parent_'.$field['name']] = (isset($parent['field_data'][$field['name']])) ? $parent['field_data'][$field['name']] : '';
+					}
 				}
 			}
 
