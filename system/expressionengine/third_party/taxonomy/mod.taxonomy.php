@@ -216,7 +216,7 @@ class Taxonomy extends Taxonomy_base {
 		}
 
 		// don't have a node, bail out
-		if(!isset($this_node) || $this_node['lft'] == '')
+		if(!isset($this_node) || !isset($this_node['lft']) || $this_node['lft'] == '')
 			return ee()->TMPL->no_results();
 
 		$parents = ee()->taxonomy->get_all_parents( $this_node['lft'], $this_node['rgt'] );
@@ -1021,9 +1021,9 @@ class Taxonomy extends Taxonomy_base {
 		// set the tree id
 		$tree_id = $this->_get_this('tree_id');
 
-		if($tree_id)
+		if($tree_id && $set)
 			$this->cache['this_node']['tree_id'] = $tree_id;
-		else
+		elseif(!$tree_id)
 			return NULL; // no tree_id no partay
 
 		if( ee()->taxonomy->set_table( $tree_id ) === FALSE )
@@ -1041,8 +1041,19 @@ class Taxonomy extends Taxonomy_base {
 		$node_id = $this->_get_this('node_id');
 		$entry_id = $this->_get_this('entry_id');
 
-		// set via node_id
-		if($node_id)
+		if($key && $val)
+		{
+			foreach($nodes as $node)
+			{
+				if(isset($node[$key]) && $node[$key] == $val)
+				{
+					$node_id = $node['node_id'];
+					if($set === TRUE) $this->cache['this_node']['node_id'] = $node_id;
+					break;
+				}
+			}
+		}
+		elseif($node_id)
 		{
 			if($set === TRUE) $this->cache['this_node']['node_id'] = $node_id;
 			$val = $node_id;
@@ -1056,17 +1067,6 @@ class Taxonomy extends Taxonomy_base {
 
 			$node_id = (isset($this->cache['trees'][$tree_id]['nodes']['by_entry_id'][$entry_id]))
 						 ? $this->cache['trees'][$tree_id]['nodes']['by_entry_id'][$entry_id] : '';
-		}
-		elseif($key && $val)
-		{
-			foreach($nodes as $node)
-			{
-				if(isset($node[$key]) && $node[$key] == $val)
-				{
-					$node_id = $this->cache['this_node']['node_id'] = $node['node_id'];
-					break;
-				}
-			}
 		}
 
 		// can't find a node, just bail out
