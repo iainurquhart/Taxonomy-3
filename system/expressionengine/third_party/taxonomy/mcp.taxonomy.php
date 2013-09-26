@@ -69,7 +69,7 @@ class Taxonomy_mcp extends Taxonomy_base {
 			$vars['trees'][$key] = $tree;
 			$vars['trees'][$key]['edit_tree_link'] 	 = anchor( $this->base_url.AMP.'method=edit_tree'.AMP.'tree_id='.$tree['id'], lang('tx_edit_tree_settings') );
 			$vars['trees'][$key]['edit_nodes_link']  = anchor( $this->base_url.AMP.'method=edit_nodes'.AMP.'tree_id='.$tree['id'], $tree['label'] );
-			$vars['trees'][$key]['delete_tree_link'] = anchor( $this->base_url.AMP.'method=delete_tree'.AMP.'tree_id='.$tree['id'], '<img src="'.ee()->cp->cp_theme_url.'images/icon-delete.png" />' );
+			$vars['trees'][$key]['delete_tree_link'] = anchor( $this->base_url.AMP.'method=delete_tree'.AMP.'tree_id='.$tree['id'], '<img src="'.$this->theme_base_url.'gfx/icon-delete.png" />' );
 		}
 
 		return $this->_content_wrapper('index', 'tx_manage_trees', $vars);	
