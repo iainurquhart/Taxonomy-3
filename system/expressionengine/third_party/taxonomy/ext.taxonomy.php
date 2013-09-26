@@ -40,7 +40,7 @@ class Taxonomy_ext {
 	public $description		= 'Brings Hierarchy to Channel Entries';
 	public $docs_url		= 'http://iain.co.nz/taxonomy';
 	public $name			= 'Taxonomy';
-	public $settings_exist	= 'y';
+	public $settings_exist	= 'n';
 	public $version			= '3.0';
 	
 	private $EE;
