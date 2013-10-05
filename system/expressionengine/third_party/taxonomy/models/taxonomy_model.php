@@ -135,7 +135,7 @@ class Taxonomy_model extends Taxonomy_base
 			$data['templates'] = ($data['templates']) ? explode('|', $data['templates']) : array();
 			$data['channels'] = ($data['channels']) ? explode('|', $data['channels']) : array();
 			$data['member_groups'] = ($data['member_groups']) ? explode('|', $data['member_groups']) : array();
-			$data['fields'] = ($data['fields']) ? json_decode($data['fields'], TRUE) : '';
+			$data['fields'] = ($data['fields']) ? json_decode($data['fields'], TRUE) : array();
 			$data['taxonomy'] = ($data['taxonomy']) ? json_decode($data['taxonomy'], TRUE) : '';
 
     		$this->cache['trees'][$this->tree_id] = $data;
