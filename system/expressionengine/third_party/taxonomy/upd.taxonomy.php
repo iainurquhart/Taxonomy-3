@@ -342,14 +342,25 @@ class Taxonomy_upd extends Taxonomy_base {
 
 
 			}
-			// ------------------------------------------------------
 
+		}
 
-			// ------------------------------------------------------
-			// UPDATES TO exp taxonomy_tree_x
-			// ------------------------------------------------------
+		// includes a new 'depth' key to the taxonomy tree array
+		// 'level' is relative to root, can be different to actual 'depth'
+		// which can be different if querying a tree from somewhere other than root. 
+		if ($current < '3.0.8') 
+		{
+			ee()->load->model('taxonomy_model', 'taxonomy');
+			$trees = ee()->db->get('taxonomy_trees')->result_array();
+			foreach($trees as $tree)
+			{
+				$data = array();
+				ee()->taxonomy->set_table( $tree['id'] );
+				$data['taxonomy'] = json_encode( ee()->taxonomy->get_tree_taxonomy() );
 
-
+				ee()->db->where('id', $tree['id']);
+				ee()->db->update( 'taxonomy_trees', $data );
+			}
 		}
 
 

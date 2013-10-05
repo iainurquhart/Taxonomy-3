@@ -1354,14 +1354,14 @@ class Taxonomy extends Taxonomy_base {
 				{
 					if($node['id'] == $parent)
 					{
-						$this->actp_lev[$node['level']]['act_lft']	= $att['lft'];
-						$this->actp_lev[$node['level']]['act_rgt']	= $att['rgt'];
+						$this->actp_lev[$node['depth']]['act_lft']	= $att['lft'];
+						$this->actp_lev[$node['depth']]['act_rgt']	= $att['rgt'];
 					}
 				}
 				if(!count($params['parents']))
 				{
-					$this->actp_lev[$node['level']]['act_lft']	= $att['lft'];
-					$this->actp_lev[$node['level']]['act_rgt']	= $att['rgt'];
+					$this->actp_lev[$node['depth']]['act_lft']	= $att['lft'];
+					$this->actp_lev[$node['depth']]['act_rgt']	= $att['rgt'];
 				}
 	    	}
 
@@ -1396,14 +1396,14 @@ class Taxonomy extends Taxonomy_base {
 
     			
 
-				if($node['id'] == $params['node_id']  && $node['level'] != 0)
+				if($node['id'] == $params['node_id']  && $node['depth'] != 0)
 				{
-					$this->act_lev[$node['level']]['act_lft']	= $att['lft'];
-					$this->act_lev[$node['level']]['act_rgt']	= $att['rgt'];
+					$this->act_lev[$node['depth']]['act_lft']	= $att['lft'];
+					$this->act_lev[$node['depth']]['act_rgt']	= $att['rgt'];
 				}
 
     			// taking out the root, or are we requesting a level below the current
-    			if( ($node['level'] == 0 || $this->cache['first_pass'] == 1) && $params['display_root'] == "no" && isset($node['children']))
+    			if( ($node['depth'] == 0 || $this->cache['first_pass'] == 1) && $params['display_root'] == "no" && isset($node['children']))
 	    		{
 	    			$this->cache['first_pass'] = 0;
 	    			return (isset($taxonomy[0]['children'])) ? $this->_pre_process_level($taxonomy[0]['children'], $params) : array();
@@ -1411,7 +1411,7 @@ class Taxonomy extends Taxonomy_base {
 
 	    		// filter statuses
     			// --------------------------------------------------
-    			if($params['depth'] < $node['level'])
+    			if($params['depth'] < $node['depth'])
     			{
 					unset($taxonomy[$key]);
     			}
@@ -1478,26 +1478,26 @@ class Taxonomy extends Taxonomy_base {
 				{
 
 					if (
-						$node['level'] == 0
+						$node['depth'] == 0
 						||
 						(
 							( // are we on a sibling of an active parent?
-							isset($this->actp_lev[($node['level']-1)]['act_lft'])
+							isset($this->actp_lev[($node['depth']-1)]['act_lft'])
 							&& 
-							$att['lft'] >= $this->actp_lev[($node['level']-1)]['act_lft']
+							$att['lft'] >= $this->actp_lev[($node['depth']-1)]['act_lft']
 							&& 
-							$att['rgt'] <= $this->actp_lev[($node['level']-1)]['act_rgt']
+							$att['rgt'] <= $this->actp_lev[($node['depth']-1)]['act_rgt']
 							)
 						||
 							( // are we on a sibling of the active
-							isset($this->act_lev[($node['level']-1)]['act_lft'])
+							isset($this->act_lev[($node['depth']-1)]['act_lft'])
 							&& 
-							$att['lft'] >= $this->act_lev[($node['level']-1)]['act_lft']
+							$att['lft'] >= $this->act_lev[($node['depth']-1)]['act_lft']
 							&& 
-							$att['rgt'] <= $this->act_lev[($node['level']-1)]['act_rgt']
+							$att['rgt'] <= $this->act_lev[($node['depth']-1)]['act_rgt']
 							)
 						)
-						|| $node['level'] <= $params['active_branch_start_level']
+						|| $node['depth'] <= $params['active_branch_start_level']
 					)
 					{
 						// getting farking complicated

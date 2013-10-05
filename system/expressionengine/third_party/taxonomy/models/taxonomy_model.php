@@ -102,7 +102,6 @@ class Taxonomy_model extends Taxonomy_base
 		foreach($trees as $tree)
 		{
 			$data[ $tree['id'] ] = $tree;
-
 			$data[ $tree['id'] ]['templates'] = explode('|', $tree['templates']);
 			$data[ $tree['id'] ]['channels'] = explode('|', $tree['channels']);
 			$data[ $tree['id'] ]['member_groups'] = explode('|', $tree['member_groups']);
@@ -659,7 +658,7 @@ class Taxonomy_model extends Taxonomy_base
 		$lastlevel = 0;
 		$level = 1;
 
-		ee()->db->select('node_id as id, rgt')->from( $this->tree_table );
+		ee()->db->select('node_id as id, rgt, depth')->from( $this->tree_table );
 
 		if($node != '')
 		{
@@ -702,7 +701,8 @@ class Taxonomy_model extends Taxonomy_base
 			// add the data
 			$current[] = array(
 				'id' => $row['id'],
-				'level' => $level
+				'level' => $level,
+				'depth' => $row['depth']
 			);
 			// go one level deeper with the index
 			
