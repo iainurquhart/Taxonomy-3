@@ -199,7 +199,7 @@ class Taxonomy_ext {
 
 	public function update_multi_entries_loop($submitted_id, $submitted_data)
 	{
-		return $menu;
+		return '';
 	}
 
 	public function sessions_end()
