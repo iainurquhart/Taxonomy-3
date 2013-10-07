@@ -240,7 +240,7 @@ class Taxonomy_ft extends EE_Fieldtype {
 		unset($data['parent_lft']); // not needed for insert
 
 		$data['parent'] = $parent['node_id'];
-		$data['depth']  = $parent['depth']+1;
+		$data['depth']  = ($parent['depth']) ? $parent['depth']+1 : 0;
 
 		if(isset($data['template_path']) && $data['template_path'] != '')
 		{

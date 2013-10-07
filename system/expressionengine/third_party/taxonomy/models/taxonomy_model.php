@@ -442,7 +442,8 @@ class Taxonomy_model extends Taxonomy_base
 			'template_path' => '',
 			'custom_url' => '',
 			'type' => array(),
-			'field_data' => ''
+			'field_data' => '',
+			'depth' => ''
 		);
 
 		$query = ee()->db->get_where( 
