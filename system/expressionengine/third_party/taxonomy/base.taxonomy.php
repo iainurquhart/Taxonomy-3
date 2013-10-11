@@ -175,7 +175,8 @@ class Taxonomy_base
 			ee()->load->library('table');
 			$this->form_base_url 	= 'C=addons_modules'.AMP.'M=show_module_cp'.AMP.'module='.TAXONOMY_SHORT_NAME;
 			$this->base_url		= BASE.AMP.$this->form_base_url;
-			$this->theme_base_url 	= ee()->config->item('theme_folder_url').'third_party/taxonomy_assets/';
+			$this->theme_base_url  = defined('URL_THIRD_THEMES') ? URL_THIRD_THEMES . 'taxonomy_assets/' : $this->EE->config->item('theme_folder_url') . 'third_party/taxonomy_assets/';
+
 
 			// add our cp js/css
 			if( ! isset($this->cache['taxonomy_assets_added']) )
