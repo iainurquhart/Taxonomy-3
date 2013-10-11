@@ -150,11 +150,16 @@ class Taxonomy_base
 	 */
 	public function __construct()
 	{
-		
+
 		ee()->load->helper('url');
 
 		$this->site_id = ee()->config->item('site_id');
-		$this->site_url = ee()->functions->fetch_site_index();
+
+		// install/update wizard in 2.7.2 chokes as the functions class isn't loaded
+		if(method_exists(ee()->functions, 'fetch_site_index'))
+		{
+			$this->site_url = ee()->functions->fetch_site_index();
+		}
 
 		if (! isset(ee()->session->cache['taxonomy']))
 		{
