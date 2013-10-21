@@ -36,7 +36,7 @@ class Taxonomy extends Taxonomy_base {
 		'node_id' => '',
 		'node_title' => 'asdsad', 
 		'node_url' => '',
-		'node_relative_url' => '',
+		'node_uri' => '',
 		'node_active' => '',
 		'node_active_parent' => '',
 		'node_active_class' => '',
@@ -226,7 +226,7 @@ class Taxonomy extends Taxonomy_base {
 			'node_id' => $this_node['node_id'],
 			'node_title' => $this_node['label'],
 			'node_url' => $this_node['url'],
-			'node_relative_url' => '', // @todo
+			'node_uri' => str_replace(ee()->functions->fetch_site_index(), '', $this_node['url']),
 			'node_lft' => $this_node['lft'],
 			'node_rgt' => $this_node['rgt'],
 			'node_entry_id' => $this_node['entry_id'],
@@ -273,7 +273,7 @@ class Taxonomy extends Taxonomy_base {
 						'node_id' => $att['node_id'],
 						'node_title' => $att['label'],
 						'node_url' => $att['url'],
-						'node_relative_url' => '', // @todo
+						'node_uri' => str_replace(ee()->functions->fetch_site_index(), '', $att['url']),
 						'node_lft' => $att['lft'],
 						'node_rgt' => $att['rgt'],
 						'node_entry_id' => $att['entry_id'],
@@ -1112,7 +1112,8 @@ class Taxonomy extends Taxonomy_base {
 				$var_prefix.'node_level-1' => (isset($node['depth'])) ? $node['depth']-1 : '',
 				$var_prefix.'node_level-2' => (isset($node['depth'])) ? $node['depth']-2 : '',
 				$var_prefix.'node_has_children' => (isset($node['has_children'])) ? $node['has_children'] : '',
-				$var_prefix.'node_url' => (isset($node['url'])) ? $node['url'] : ''
+				$var_prefix.'node_url' => (isset($node['url'])) ? $node['url'] : '',
+				$var_prefix.'node_uri' => (isset($node['url'])) ? str_replace(ee()->functions->fetch_site_index(), '', $node['url']) : '',
 			);
 
 			if(count($tree['fields']))
@@ -1151,7 +1152,8 @@ class Taxonomy extends Taxonomy_base {
 				$var_prefix.'parent_node_level-1' => (isset($parent['depth'])) ? $parent['depth']-1 : '',
 				$var_prefix.'parent_node_level-2' => (isset($parent['depth'])) ? $parent['depth']-2 : '',
 				$var_prefix.'parent_node_has_children' => 'yes', // duh
-				$var_prefix.'parent_node_url' => (isset($parent['url'])) ? $parent['url'] : ''
+				$var_prefix.'parent_node_url' => (isset($parent['url'])) ? $parent['url'] : '',
+				$var_prefix.'parent_node_uri' => (isset($parent['url'])) ? str_replace(ee()->functions->fetch_site_index(), '', $parent['url']) : '',
 			);
 
 			if(count($tree['fields']))
@@ -1272,7 +1274,7 @@ class Taxonomy extends Taxonomy_base {
 					'node_id' => $att['node_id'],
 					'node_title' => $att['label'],
 					'node_url' => $att['url'],
-					'node_relative_url' => '', // @todo
+					'node_uri' => str_replace(ee()->functions->fetch_site_index(), '', $att['url']),
 					'node_active' => $active,
 					'node_active_parent' => $active_parent,
 					'node_active_class' => ($active) ? $active : $active_parent,
