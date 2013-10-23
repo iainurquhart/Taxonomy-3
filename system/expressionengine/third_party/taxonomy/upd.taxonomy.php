@@ -259,25 +259,6 @@ class Taxonomy_upd extends Taxonomy_base {
 			$trees = ee()->db->get('taxonomy_trees')->result_array();
 			foreach($trees as $tree)
 			{
-				ee()->taxonomy->set_table( $tree['id'] );
-				$taxonomy = json_encode( ee()->taxonomy->get_tree_taxonomy() );
-				// modify each tree table column names
-	            ee()->db->where('id', $tree['id']);
-	            // if fields has data, decode it so it can be json encoded
-	            $field_data = ($tree['fields'] != '') ? unserialize(base64_decode($tree['fields'])) : '';
-	            $data = array(
-	            	'name' => url_title($tree['label'], '_', TRUE),
-	            	'fields' => ($field_data) ? json_encode($field_data) : '',
-	            	'taxonomy' => $taxonomy 
-	            );
-				ee()->db->update('taxonomy_trees', $data );
-
-				/*
-					add 'depth' column
-					add 'parent' column
-					add 'type' column
-					base64_decode, unserialize 'field_data' and json_encode them
-				*/
 
 				// ---------------------------
 				// add the depth, parent and type columns
@@ -299,8 +280,26 @@ class Taxonomy_upd extends Taxonomy_base {
 						'null' => TRUE
 					)
 				);
+
 				ee()->dbforge->add_column('taxonomy_tree_'.$tree['id'], $fields);
 				// ---------------------------
+
+				ee()->taxonomy->set_table( $tree['id'] );
+				$taxonomy = json_encode( ee()->taxonomy->get_tree_taxonomy() );
+
+				// modify each tree table column names
+	            ee()->db->where('id', $tree['id']);
+
+	            // if fields has data, decode it so it can be json encoded
+	            $field_data = ($tree['fields'] != '') ? unserialize(base64_decode($tree['fields'])) : '';
+
+	            $data = array(
+	            	'name' => url_title($tree['label'], '_', TRUE),
+	            	'fields' => ($field_data) ? json_encode($field_data) : '',
+	            	'taxonomy' => $taxonomy 
+	            );
+	            
+				ee()->db->update('taxonomy_trees', $data );
 
 				// update node values
 				// add depth and parent data
