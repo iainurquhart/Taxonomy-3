@@ -857,6 +857,24 @@ class Taxonomy_model extends Taxonomy_base
 	}
 
 	// --------------------------------------------------------------------
+	
+	/**
+	 * Inserts the node as the last child the node with the node_id specified.
+	 * @param $node_id The id of the node to be parent
+	 * @param $data The data to be inserted into the row (associative array, key = column).
+	 * @return array with the new lft, rgt and id values, False otherwise
+	 */
+	function append_node_last_by_id( $node_id, $data )
+	{
+		$node = $this->get_node_by_id($node_id);
+
+		if(!$node)
+			return false;
+
+		return $this->insert_node( $node['rgt'], $data );
+	}
+
+	// --------------------------------------------------------------------
 
 	// @todo
 	// this is requiring a complete overhaul. 

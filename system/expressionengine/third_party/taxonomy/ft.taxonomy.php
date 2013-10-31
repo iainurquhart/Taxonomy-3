@@ -240,7 +240,22 @@ class Taxonomy_ft extends EE_Fieldtype {
 		unset($data['parent_lft']); // not needed for insert
 
 		$data['parent'] = $parent['node_id'];
-		$data['depth']  = ($parent['depth']) ? $parent['depth']+1 : 0;
+
+		$parent_depth = (int) $parent['depth'];
+
+		if($parent['node_id'] === '') // this is the root node
+		{
+			$data['depth'] = 0;
+		}
+		elseif($parent_depth === 0) // child of the root node
+		{
+			$data['depth'] = 1;
+		}
+		else // child of somewhere else in the tree
+		{
+			$data['depth'] = $parent_depth+1;
+		}
+
 
 		if(isset($data['template_path']) && $data['template_path'] != '')
 		{
@@ -277,7 +292,7 @@ class Taxonomy_ft extends EE_Fieldtype {
 				// than try some shady ass move. Delete is shady enough, move will
 				// blow your mind.
 				ee()->taxonomy->delete_node($node['lft']);
-				ee()->taxonomy->append_node_last( $parent['lft'], $data );
+				ee()->taxonomy->append_node_last_by_id( $parent['node_id'], $data );
 
 				$ext_info = array(
 					'update_type' => 'new_parent',
