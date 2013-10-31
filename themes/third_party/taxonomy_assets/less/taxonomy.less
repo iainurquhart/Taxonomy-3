@@ -2,6 +2,8 @@
 
 .chzn-results .disabled{color:#CCC; text-decoration: strike;}
 
+
+
 #mainContent .taxonomy-content {
 
 	margin: 0 20px 150px 15px;
@@ -341,10 +343,20 @@
 			cursor: wait;
 		}
 
+		ol#taxonomy-list li.placeholder.taxonomy-item-error {
+			background: #990000 url(../gfx/warning_tile.jpg) repeat !important;
+		}
+
 		h3 div.item-wrapper {
 			padding-left: 20px;
 			padding-top: 3px;
 			padding-bottom: 3px;
+			.item-options {
+				line-height: 46px;
+			}
+			span.node-info {
+				height: 46px;
+			}
 		}
 
 		div.item-wrapper {
@@ -385,9 +397,9 @@
 				display: none;
 				float: right;
 				font-weight: normal;
-				padding: 3px 10px 3px 10px;
+				padding: 0px 10px 0px 10px;
 				font-size: 11px;
-				line-height: 35px;
+				line-height: 40px;
 				position: absolute;
 				top: 0px;
 				right: 0px;
@@ -408,6 +420,7 @@
 					line-height: 18px;
 					padding: 5px 10px;
 					border: 1px solid rgba(255,255,255,1);
+					margin: 0;
 					margin-right: 0;
 					margin-left: 0;
 				}
@@ -428,16 +441,17 @@
 				color: #5F6C74;
 				display: inline-block;
 				margin: 0 5px;
+
 			}
 
 			span.node-info {
-				width: 16px;
-				height: 16px;
-				background: url(../gfx/information.png) no-repeat 50% 50%;
+				width: 25px;
+				height: 40px;
+				background: url(../gfx/information.png) no-repeat 10% 50%;
 				text-indent: -3000px;
 				display: inline-block;
-				margin-top: 5px;
-				margin-bottom: -5px;
+				
+				float: left;
 			}
 			
 			

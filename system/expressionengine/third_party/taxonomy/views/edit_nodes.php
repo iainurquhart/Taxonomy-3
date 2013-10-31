@@ -20,6 +20,7 @@
 		{	
 			disableNesting: 'no-nest',
 			forcePlaceholderSize: true,
+			errorClass: 'taxonomy-item-error',
 			handle: 'div.item-handle',
 			items: 'li',
 			opacity: .92,
