@@ -105,6 +105,7 @@ class Taxonomy_model extends Taxonomy_base
 			$data[ $tree['id'] ]['templates'] = explode('|', $tree['templates']);
 			$data[ $tree['id'] ]['channels'] = explode('|', $tree['channels']);
 			$data[ $tree['id'] ]['member_groups'] = explode('|', $tree['member_groups']);
+			$data[ $tree['id'] ]['nested_urls'] = $tree['nested_urls'];
 
 		}
 
@@ -165,6 +166,7 @@ class Taxonomy_model extends Taxonomy_base
 			ee()->db->from( $this->tree_table );
 			ee()->db->join('channel_titles', 'channel_titles.entry_id = '.$this->tree_table.'.entry_id', 'left');
 			ee()->db->join('statuses', 'statuses.status = channel_titles.status', 'left');
+			ee()->db->order_by($this->tree_table.".lft", "asc");
     		$nodes = ee()->db->get()->result_array();
     		
     		// reindex with node ids as keys

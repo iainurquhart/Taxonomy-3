@@ -170,6 +170,7 @@ class Taxonomy_mcp extends Taxonomy_base {
 		$data['templates'] 		= (isset($data['templates'])) ? implode('|', $data['templates']) : '';
 		$data['channels'] 		= (isset($data['channels'])) ? implode('|', $data['channels']) : '';
 		$data['member_groups'] 	= (isset($data['member_groups'])) ? implode('|', $data['member_groups']) : '';
+		$data['nested_urls'] 	= (isset($data['nested_urls'])) ? 1 : 0;
 		$data['site_id'] = $this->site_id;
 		$data['fields'] = '';
 

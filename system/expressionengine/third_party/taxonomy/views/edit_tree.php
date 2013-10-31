@@ -51,6 +51,11 @@
 		);
 	}
 
+	$this->table->add_row(
+		form_label(lang('tx_nested_urls'), 'nested_urls').lang('tx_nested_urls_note'),
+		form_checkbox('tree[nested_urls]', 1, $tree['nested_urls']). NBS . NBS .lang('yes')
+	);
+
 	echo $this->table->generate();
 	$this->table->clear();
 

@@ -75,7 +75,9 @@ $lang = array(
 	'tx_select_parent' => "Select Parent:",
 	"nav_taxonomy_nav_label"		=> "$taxonomy_nav_label",
 	"tx_select_template" => 'Select Template:',
-	'tx_fetch_title' => 'Fetch the Entry Title'
+	'tx_fetch_title' => 'Fetch the Entry Title',
+	'tx_nested_urls' => 'Nest URLs based on entry URL titles',
+	'tx_nested_urls_note' => ' <br /> Note: this is an experimental feature for outputing /full/urls/throughout/this/tree. Requires the pages module to be installed.'
 );
 
 /* End of file lang.taxonomy.php */

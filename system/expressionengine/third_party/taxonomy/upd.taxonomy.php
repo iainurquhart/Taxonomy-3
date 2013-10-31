@@ -362,9 +362,35 @@ class Taxonomy_upd extends Taxonomy_base {
 			}
 		}
 
+		if ($current < '3.1') 
+		{
+			ee()->load->dbforge();
 
+			// add our nested_urls column
+			$fields = array(
+				'nested_urls' => array(
+					'type' => 'int',
+					'constraint' => '1',
+					'default' => 0
+				)
+			);
+			ee()->dbforge->add_column('taxonomy_trees', $fields);
 
-		// If you have updates, drop 'em in here.
+			// add our new extension hook
+			$data = array(
+				'class' => 'Taxonomy_ext',
+				'method' => 'core_template_route',
+				'hook' => 'core_template_route',
+				'priority' => 10,
+				'version' => $this->version,
+				'enabled' => 'y',
+				'settings' => ''
+			);
+
+			ee()->db->insert('extensions', $data);
+	
+		}
+
 		return TRUE;
 
 		
