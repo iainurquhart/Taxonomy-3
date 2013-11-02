@@ -33,7 +33,8 @@ class Taxonomy_mcp extends Taxonomy_base {
 		'fields' => '',
 		'member_groups' => '',
 		'tree_array' => '',
-		'max_depth' => 0
+		'max_depth' => 0,
+		'nested_urls' => 0
 	);
 
 	// ----------------------------------------------------------------
