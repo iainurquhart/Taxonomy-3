@@ -436,7 +436,8 @@ class Taxonomy extends Taxonomy_base {
 			'parents' => array(),
 			'list_type' => $this->get_param('list_type', 'ul'),
 			'field_keys' => array(),
-			'include_ul' => $this->get_param('include_ul', 'yes')
+			'include_ul' => $this->get_param('include_ul', 'yes'),
+			'var_prefix' => $this->get_param('var_prefix', '')
 		);
 		// --------------------------------------------------
 
@@ -1271,33 +1272,33 @@ class Taxonomy extends Taxonomy_base {
 
 
     			$vars = array(
-					'node_id' => $att['node_id'],
-					'node_title' => $att['label'],
-					'node_url' => $att['url'],
-					'node_uri' => str_replace(ee()->functions->fetch_site_index(), '', $att['url']),
-					'node_active' => $active,
-					'node_active_parent' => $active_parent,
-					'node_active_class' => ($active) ? $active : $active_parent,
-					'node_lft' => $att['lft'],
-					'node_rgt' => $att['rgt'],
-					'node_entry_id' => $att['entry_id'],
-					'node_custom_url' => $att['custom_url'],
+					$params['var_prefix'].'node_id' => $att['node_id'],
+					$params['var_prefix'].'node_title' => $att['label'],
+					$params['var_prefix'].'node_url' => $att['url'],
+					$params['var_prefix'].'node_uri' => str_replace(ee()->functions->fetch_site_index(), '', $att['url']),
+					$params['var_prefix'].'node_active' => $active,
+					$params['var_prefix'].'node_active_parent' => $active_parent,
+					$params['var_prefix'].'node_active_class' => ($active) ? $active : $active_parent,
+					$params['var_prefix'].'node_lft' => $att['lft'],
+					$params['var_prefix'].'node_rgt' => $att['rgt'],
+					$params['var_prefix'].'node_entry_id' => $att['entry_id'],
+					$params['var_prefix'].'node_custom_url' => $att['custom_url'],
 					// 'node_field_data' => $att['field_data'],
-					'node_entry_title' => $att['title'],
-					'node_entry_url_title' => $att['url_title'],
-					'node_entry_status' => $att['status'],
-					'node_entry_entry_date' => $att['entry_date'],
-					'node_entry_expiration_date' => $att['expiration_date'],
-					'node_entry_template_name' => '', // @todo
-					'node_entry_template_group_name' => '', // @todo
-					'node_has_children' => (isset($node['children'])) ? 'yes' : 0,
-					'node_next_child' => $att['lft']+1,
-					'node_level' => $node['level'],
-					'node_level_count' => $level_count,
-					'node_level_total_count' => $level_total_count,
-					'node_indent' => str_repeat(' ', $level_count),
-					'node_count' => ee()->session->cache['taxonomy_node_count']++,
-					'children' => ''
+					$params['var_prefix'].'node_entry_title' => $att['title'],
+					$params['var_prefix'].'node_entry_url_title' => $att['url_title'],
+					$params['var_prefix'].'node_entry_status' => $att['status'],
+					$params['var_prefix'].'node_entry_entry_date' => $att['entry_date'],
+					$params['var_prefix'].'node_entry_expiration_date' => $att['expiration_date'],
+					$params['var_prefix'].'node_entry_template_name' => '', // @todo
+					$params['var_prefix'].'node_entry_template_group_name' => '', // @todo
+					$params['var_prefix'].'node_has_children' => (isset($node['children'])) ? 'yes' : 0,
+					$params['var_prefix'].'node_next_child' => $att['lft']+1,
+					$params['var_prefix'].'node_level' => $node['level'],
+					$params['var_prefix'].'node_level_count' => $level_count,
+					$params['var_prefix'].'node_level_total_count' => $level_total_count,
+					$params['var_prefix'].'node_indent' => str_repeat(' ', $level_count),
+					$params['var_prefix'].'node_count' => ee()->session->cache['taxonomy_node_count']++,
+					$params['var_prefix'].'children' => ''
 				);
 				
 				// add our default field values
