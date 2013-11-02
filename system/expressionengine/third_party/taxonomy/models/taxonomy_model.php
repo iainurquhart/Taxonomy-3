@@ -1442,6 +1442,111 @@ class Taxonomy_model extends Taxonomy_base
 
 	// --------------------------------------------------------------------
 
+	public function inject_pages()
+	{
+
+		$this->cache =& ee()->session->cache['taxonomy'];
+
+		// find trees which have been set to nested_urls
+		ee()->db->select('id');
+		$trees = ee()->db->get_where('taxonomy_trees', array('nested_urls' => 1));
+
+		foreach ($trees->result_array() as $tree)
+		{
+
+			ee()->taxonomy->set_table($tree['id']);
+
+			// load our tree array and nodes
+			$tree = ee()->taxonomy->get_tree();
+			$nodes = ee()->taxonomy->get_nodes();
+			
+			foreach($nodes['by_node_id'] as $node_id => $node)
+			{
+				// remap the node url
+				$url = $this->add_parent_segments(
+						$tree['id'],
+						$node_id, 
+						'/'.$node['url_title']
+					);
+				
+				if($node['entry_id'] && $node['template_path'])
+				{
+					// add the entries/templates to the site_pages array
+					ee()->config->config['site_pages'][$this->site_id]['uris'][$node['entry_id']] = $url;
+					ee()->config->config['site_pages'][$this->site_id]['templates'][$node['entry_id']] = $node['template_path'];
+				}
+				
+
+				$this->cache['trees'][$tree['id']]['nodes']['by_node_id'][$node_id]['url'] = $url;
+
+			}
+
+
+			// update our cached node array with the updated urls
+			foreach($this->cache['trees'][$tree['id']]['nodes']['by_node_id'] as &$node)
+			{
+				if($node['custom_url'] != '')
+				{
+					if(isset($node['custom_url'][0]) && $node['custom_url'][0] == '/')
+		    		{
+		    			$node['url'] = ee()->functions->fetch_site_index().str_replace('/alias:', '/', $node['custom_url']);
+		    		}
+		    		else
+		    		{
+		    			$node['url'] = $node['custom_url'];
+		    		}
+					
+				}
+				else
+				{
+					$node['url'] = str_replace(ee()->functions->fetch_site_index(), '', $node['url']);
+					$node['url'] = ee()->functions->fetch_site_index().$node['url'];
+				}
+
+
+				
+				// add globals for urls
+				ee()->config->_global_vars['node_'.$tree['id'].'_'.$node['node_id']] = $node['url'];
+				if($node['entry_id'])
+				{
+					ee()->config->_global_vars['entry_'.$tree['id'].'_'.$node['entry_id']] = $node['url'];
+				}
+
+
+				
+			}
+			// var_dump(ee()); exit();
+			
+		}
+	}
+
+	private function add_parent_segments($tree_id, $node_id, $url_title)
+	{
+		$this_node = $this->cache['trees'][$tree_id]['nodes']['by_node_id'][$node_id];
+
+		if($this_node['parent'] != 0)
+		{
+			if(0 === strpos($this_node['custom_url'], '/alias:'))
+    		{	
+    			// $node['url'] = $this_node['custom_url'];
+    			return str_replace('/alias:', '/', $this_node['custom_url']);
+    		}
+    		else
+    		{
+    			$parent_node = $this->cache['trees'][$tree_id]['nodes']['by_node_id'][$this_node['parent']];
+    			return $parent_node['url'].$url_title;
+    		}
+			// echo $this->cache['trees'][$tree_id]['nodes']['by_node_id'][ $this_node['parent'] ]['parent'];
+
+			// print_r($parent_node);
+			
+		}
+		else
+		{
+			return $url_title;
+		}
+	}
+
 	//////////////////////////////////////////////
 	//  Helper functions
 	//////////////////////////////////////////////

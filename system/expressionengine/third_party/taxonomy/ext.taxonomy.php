@@ -205,7 +205,8 @@ class Taxonomy_ext {
 
 	public function sessions_end()
 	{
-		// Add Code for the sessions_end hook here.  
+		
+
 	}
 
 	public function core_template_route($uri_string)
@@ -216,71 +217,13 @@ class Taxonomy_ext {
 
 		// using this instead of sessions_end so the following queries/logic aren't
 		// run when using add-ons like CE cache.
+
 		ee()->load->model('taxonomy_model', 'taxonomy');
-		$this->cache =& ee()->session->cache['taxonomy'];
-
-		ee()->db->select('id');
-
-		$trees = ee()->db->get_where('taxonomy_trees', array('nested_urls' => 1));
-
-		foreach ($trees->result_array() as $tree)
-		{
-
-			ee()->taxonomy->set_table($tree['id']);
-			$tree = ee()->taxonomy->get_tree();
-			$nodes = ee()->taxonomy->get_nodes();
-			// print_r($nodes);exit();
-			foreach($nodes['by_node_id'] as $node_id => $node)
-			{
-
-				$url = $this->add_parent_segments(
-						$tree['id'],
-						$node_id, 
-						'/'.$node['url_title']
-					);
-					
-				ee()->config->config['site_pages'][1]['uris'][$node['entry_id']] = $url;
-				ee()->config->config['site_pages'][1]['templates'][$node['entry_id']] = $node['template_path'];
-
-				$this->cache['trees'][$tree['id']]['nodes']['by_node_id'][$node_id]['url'] = $url;
-
-			}
-
-			foreach($this->cache['trees'][$tree['id']]['nodes']['by_node_id'] as &$node)
-			{
-				if($node['custom_url'] != '')
-				{
-					$node['url'] = $node['custom_url'];
-				}
-				else
-				{
-					$node['url'] = str_replace(ee()->functions->fetch_site_index(), '', $node['url']);
-					$node['url'] = ee()->functions->fetch_site_index().$node['url'];
-				}
-			}
-
-		}
-
+		ee()->taxonomy->inject_pages();
+		
 		return;
 	}
 
-	private function add_parent_segments($tree_id, $node_id, $url_title)
-	{
-		$this_node = $this->cache['trees'][$tree_id]['nodes']['by_node_id'][$node_id];
-
-		if($this_node['parent'] != 0)
-		{
-			// echo $this->cache['trees'][$tree_id]['nodes']['by_node_id'][ $this_node['parent'] ]['parent'];
-			$parent_node = $this->cache['trees'][$tree_id]['nodes']['by_node_id'][$this_node['parent']]; 
-
-			// print_r($parent_node);
-			return $parent_node['url'].$url_title;
-		}
-		else
-		{
-			return $url_title;
-		}
-	}
 
 	// ----------------------------------------------------------------------
 
