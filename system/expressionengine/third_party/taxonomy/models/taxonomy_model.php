@@ -1447,6 +1447,13 @@ class Taxonomy_model extends Taxonomy_base
 
 		$this->cache =& ee()->session->cache['taxonomy'];
 
+		//no need to run this if it's been called before.
+
+		if(isset($this->cache['pages_injected']) && $this->cache['pages_injected'] === TRUE)
+		{
+			return;
+		}
+
 		// find trees which have been set to nested_urls
 		ee()->db->select('id');
 		$trees = ee()->db->get_where('taxonomy_trees', array('nested_urls' => 1));
@@ -1454,11 +1461,11 @@ class Taxonomy_model extends Taxonomy_base
 		foreach ($trees->result_array() as $tree)
 		{
 
-			ee()->taxonomy->set_table($tree['id']);
+			$this->set_table($tree['id']);
 
 			// load our tree array and nodes
-			$tree = ee()->taxonomy->get_tree();
-			$nodes = ee()->taxonomy->get_nodes();
+			$tree = $this->get_tree();
+			$nodes = $this->get_nodes();
 			
 			foreach($nodes['by_node_id'] as $node_id => $node)
 			{
@@ -1481,7 +1488,6 @@ class Taxonomy_model extends Taxonomy_base
 
 			}
 
-
 			// update our cached node array with the updated urls
 			foreach($this->cache['trees'][$tree['id']]['nodes']['by_node_id'] as &$node)
 			{
@@ -1502,8 +1508,6 @@ class Taxonomy_model extends Taxonomy_base
 					$node['url'] = str_replace(ee()->functions->fetch_site_index(), '', $node['url']);
 					$node['url'] = ee()->functions->fetch_site_index().$node['url'];
 				}
-
-
 				
 				// add globals for urls
 				ee()->config->_global_vars['node_'.$tree['id'].'_'.$node['node_id']] = $node['url'];
@@ -1512,12 +1516,10 @@ class Taxonomy_model extends Taxonomy_base
 					ee()->config->_global_vars['entry_'.$tree['id'].'_'.$node['entry_id']] = $node['url'];
 				}
 
-
-				
 			}
-			// var_dump(ee()); exit();
 			
 		}
+		$this->cache['pages_injected'] = TRUE;
 	}
 
 	private function add_parent_segments($tree_id, $node_id, $url_title)
