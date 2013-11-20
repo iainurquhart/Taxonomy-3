@@ -1468,6 +1468,16 @@ class Taxonomy_model extends Taxonomy_base
 			$data['type'] = implode('|', $data['type']);
 		}
 
+		// ensure entry_id is set correctly for sql strict_mode
+		if(isset($data['entry_id']) && $data['entry_id'] != '')
+		{
+			$data['entry_id'] = (int) $data['entry_id'];
+		}
+		else
+		{
+			$data['entry_id'] = NULL;
+		}
+
 		unset($data['tree_id']);
 		unset($data['is_root']);
 		unset($data['parent_lft']);

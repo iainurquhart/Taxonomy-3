@@ -66,7 +66,7 @@ $(document).ready(function () {
 						<label for="node-template">Select Template:</label>
 						<select id="node-template" name="node[template_path]">
 							<?php if( count($template_options) > 1 ) : ?>
-							 <option>--</option>
+							 <option value="">--</option>
 							<?php endif ?>
 							<?php foreach( $template_options as $template_id => $template) : ?>
 							<option value="<?php echo $template_id; ?>"
@@ -84,7 +84,7 @@ $(document).ready(function () {
 					<div class="taxonomy-inset">
 						<label for="node-entry">Select Entry:</label>
 						<select id="node-entry" name="node[entry_id]" class="chzn-select">
-							<option>--</option>
+							<option value="">--</option>
 							<?php foreach( $channel_entries as $entry_id => $entry) : ?>
 							<option value="<?php echo $entry_id; ?>"
 								<?php if($this_node['entry_id'] == $entry_id): ?>
