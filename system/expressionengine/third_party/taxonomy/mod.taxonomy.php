@@ -753,15 +753,24 @@ class Taxonomy extends Taxonomy_base {
 				}
 				$vars[$direction.'_node_'.$key] = $val;
 			}
-		}
-
-		if($vars)
-		{
 			return ee()->TMPL->parse_variables(ee()->TMPL->tagdata, array($vars));
 		}
 		else
 		{
-			return '';
+			// dealing with no_results is problematic as this tag is *usually* nested
+			// in a channel entries, so have our own {if no_next_node} option
+			$tagdata  = ee()->TMPL->tagdata;
+			$tag_name = 'no_'.$direction.'_node';  
+			$pattern  = '#' .LD .'if ' .$tag_name .RD .'(.*?)' .LD .'/if' .RD .'#s';
+
+			if (is_string($tagdata) && preg_match($pattern, $tagdata, $matches))
+			{
+			  return $matches[1];
+			}
+			else
+			{
+				return ee()->TMPL->no_results();
+			}
 		}
 		
 	}
