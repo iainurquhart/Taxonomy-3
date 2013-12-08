@@ -697,22 +697,22 @@ class Taxonomy extends Taxonomy_base {
 		} 
 
 		// load what we need from the tree structure
-		$tree = ee()->taxonomy->get_tree();
-		ee()->taxonomy->get_nodes(); // loads the session array with node data
+		$tree  = ee()->taxonomy->get_tree();
+		$nodes = ee()->taxonomy->get_nodes();
 
 		$this_node = array();
 		$next_node = array();
 		$vars = array();
 
 		// does the node we're declaring exist?
-		if(isset($tree['nodes']['by_node_id']) && is_array($tree['nodes']['by_node_id']))
+		if(isset($nodes['by_node_id']) && is_array($nodes['by_node_id']))
 		{
-			foreach($tree['nodes']['by_node_id'] as $key => $node)
+			foreach($nodes['by_node_id'] as $key => $node)
 			{
 				// find our current node's data
 				if($node['entry_id'] == $entry_id)
 				{
-					$this_node = $tree['nodes']['by_node_id'][$key];
+					$this_node = $nodes['by_node_id'][$key];
 					break;
 				}
 			}
@@ -731,7 +731,7 @@ class Taxonomy extends Taxonomy_base {
 				}
 
 				// loop again and find what we're after
-				foreach($tree['nodes']['by_node_id'] as $node)
+				foreach($nodes['by_node_id'] as $node)
 				{
 					if(isset($node[$key]) && $node[$key] == $val)
 					{
