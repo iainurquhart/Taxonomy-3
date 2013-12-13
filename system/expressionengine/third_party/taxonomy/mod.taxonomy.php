@@ -685,9 +685,10 @@ class Taxonomy extends Taxonomy_base {
 		
 		$tree_id 		= $this->_get_this('tree_id');
 		$entry_id 		= $this->_get_this('entry_id');
+		$node_id 		= $this->_get_this('node_id');
 
 		// no tree or no entry && no node_id no partay.
-		if(!$tree_id || (!$entry_id && !$entry_id))
+		if(!$tree_id || (!$entry_id && !$node_id))
 			return '';
 
 		if( ee()->taxonomy->set_table( $tree_id ) === FALSE )
@@ -707,13 +708,21 @@ class Taxonomy extends Taxonomy_base {
 		// does the node we're declaring exist?
 		if(isset($nodes['by_node_id']) && is_array($nodes['by_node_id']))
 		{
-			foreach($nodes['by_node_id'] as $key => $node)
+			// fetch a node by node_id directly
+			if(isset($nodes['by_node_id'][$node_id]))
 			{
-				// find our current node's data
-				if($node['entry_id'] == $entry_id)
+				$this_node = $nodes['by_node_id'][$node_id];
+			}
+			else
+			{
+				foreach($nodes['by_node_id'] as $key => $node)
 				{
-					$this_node = $nodes['by_node_id'][$key];
-					break;
+					// find our current node's data
+					if($node['entry_id'] == $entry_id)
+					{
+						$this_node = $nodes['by_node_id'][$key];
+						break;
+					}
 				}
 			}
 			if($this_node)
