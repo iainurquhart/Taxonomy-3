@@ -107,7 +107,7 @@ class Taxonomy_mcp extends Taxonomy_base {
 					'plugin' => array('ee_url_title')
 				)
 			);
-			ee()->cp->add_to_head('
+			ee()->cp->add_to_foot('
 				<script type="text/javascript" charset="utf-8">
 				// <![CDATA[
 					$(document).ready(function() {
