@@ -4,10 +4,9 @@
 		$('.taxonomy_fetch_title').click(function(e) 
 		{	
 				e.preventDefault();
-				var titleval = $('input#title').val();
+				var titleVal = $('input[name="title"]').val();
 				var fieldTable = $(this).closest('table');
-
-				fieldTable.find('.taxonomy_label').val(titleval);								
+				fieldTable.find('.taxonomy_label').val(titleVal);								
 		});
 	});
 </script>
@@ -95,7 +94,3 @@
 	echo $this->table->generate();
 
 ?>
-<?php // echo "<pre>"; print_r($data); echo "</pre>"; ?>
-<?php // echo "<pre>"; print_r($templates); echo "</pre>"; ?>
-<?php // echo "<pre>"; print_r($tree); echo "</pre>"; ?>
-<?php // echo "<pre>"; print_r($settings); echo "</pre>"; ?>
