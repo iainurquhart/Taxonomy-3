@@ -400,6 +400,11 @@ class Taxonomy extends Taxonomy_base {
 			ee()->session->cache['taxonomy_node_count'] = 1;
 		}
 
+		if (! isset(ee()->session->cache['taxonomy_node_previous_level']))
+		{
+			ee()->session->cache['taxonomy_node_previous_level'] = 0;
+		}
+
 		// tag parameters
 		// --------------------------------------------------
 		$params = array(
@@ -663,6 +668,8 @@ class Taxonomy extends Taxonomy_base {
 		{
 			$r = $params['html_before'].$r.$params['html_after'];
 		}
+
+		ee()->session->cache['taxonomy_node_previous_level'] = 0;
 
 		return $r;
 
@@ -1286,8 +1293,6 @@ class Taxonomy extends Taxonomy_base {
     				$active_parent = 'active_parent';
     			}
 
-
-
     			$vars = array(
 					'node_id' => $att['node_id'],
 					'node_title' => $att['label'],
@@ -1315,8 +1320,12 @@ class Taxonomy extends Taxonomy_base {
 					'node_level_total_count' => $level_total_count,
 					'node_indent' => str_repeat(' ', $level_count),
 					'node_count' => ee()->session->cache['taxonomy_node_count']++,
-					'children' => ''
+					'children' => '',
+					'node_previous_level' => ee()->session->cache['taxonomy_node_previous_level'],
+					'node_previous_level_diff' => ee()->session->cache['taxonomy_node_previous_level'] - $node['level']
 				);
+
+				ee()->session->cache['taxonomy_node_previous_level'] = $node['level'];
 				
 				// add our default field values
 				$vars += $params['field_keys'];
@@ -1350,6 +1359,7 @@ class Taxonomy extends Taxonomy_base {
 			}
 
 			$level_count++;
+
 
     	}
 
