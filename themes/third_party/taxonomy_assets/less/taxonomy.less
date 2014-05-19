@@ -341,11 +341,7 @@
 			cursor: wait;
 		}
 
-		h3 div.item-wrapper {
-			padding-left: 20px;
-			padding-top: 3px;
-			padding-bottom: 3px;
-		}
+
 
 		div.item-wrapper {
 			text-shadow: 0 1px 0 white;
@@ -385,9 +381,9 @@
 				display: none;
 				float: right;
 				font-weight: normal;
-				padding: 3px 10px 3px 10px;
+				padding: 5px 10px 0px 10px;
 				font-size: 11px;
-				line-height: 35px;
+				line-height: 30px !important;
 				position: absolute;
 				top: 0px;
 				right: 0px;
@@ -436,8 +432,8 @@
 				background: url(../gfx/information.png) no-repeat 50% 50%;
 				text-indent: -3000px;
 				display: inline-block;
-				margin-top: 5px;
-				margin-bottom: -5px;
+				margin: 7px 10px 0 0;
+				float: left;
 			}
 			
 			
@@ -449,6 +445,15 @@
 			.item-options {
 				background: white url(../gfx/item.png) repeat-x 0 100%;
 				display: inline-block;
+			}
+		}
+
+		h3 div.item-wrapper {
+			padding-left: 20px;
+			padding-top: 3px;
+			padding-bottom: 3px;
+			.item-options {
+				padding-top: 8px;
 			}
 		}
 
