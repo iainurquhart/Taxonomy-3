@@ -33,6 +33,9 @@ class Taxonomy extends Taxonomy_base {
 	public $return_data;
 
 	public $node_vars = array(
+		'tree_label' => '',
+		'tree_name' => '',
+		'tree_id' => '',
 		'node_id' => '',
 		'node_title' => 'asdsad', 
 		'node_url' => '',
@@ -103,6 +106,7 @@ class Taxonomy extends Taxonomy_base {
 	public function node_url()
 	{
 		
+		$tree 			= $this->_get_this('tree');
 		$tree_id 		= $this->_get_this('tree_id');
 		$entry_id 		= $this->_get_this('entry_id');
 		$node_id 		= $this->_get_this('node_id');
@@ -152,6 +156,7 @@ class Taxonomy extends Taxonomy_base {
 	function breadcrumbs()
 	{
 		
+		$tree 			= $this->_get_this('tree');
 		$tree_id 		= $this->_get_this('tree_id');
 		$entry_id 		= $this->_get_this('entry_id');
 		$node_id 		= $this->_get_this('node_id');
@@ -223,6 +228,9 @@ class Taxonomy extends Taxonomy_base {
 		
 		// set our current node vars
 		$this_node_vars = array(
+			'tree_label' => $tree['label'],
+    		'tree_name' => $tree['name'],
+    		'tree_id' => $tree_id,
 			'node_id' => $this_node['node_id'],
 			'node_title' => $this_node['label'],
 			'node_url' => $this_node['url'],
@@ -270,6 +278,9 @@ class Taxonomy extends Taxonomy_base {
 					$att = $node_cache['by_node_id'][$p_id];
 
 					$vars[$i] = array(
+						'tree_label' => $tree['label'],
+    					'tree_name' => $tree['name'],
+    					'tree_id' => $tree_id,
 						'node_id' => $att['node_id'],
 						'node_title' => $att['label'],
 						'node_url' => $att['url'],
@@ -371,6 +382,7 @@ class Taxonomy extends Taxonomy_base {
 	 */
 	function nav()
 	{
+		$tree 			= $this->_get_this('tree');
 		$tree_id 		= $this->_get_this('tree_id');
 
 		// no tree, no partay.
@@ -801,7 +813,7 @@ class Taxonomy extends Taxonomy_base {
 	// return a pipe delimited string of entry_ids which are siblings to the node given.
 	public function sibling_entry_ids()
 	{
-
+		$tree 			= $this->_get_this('tree');
 		$tree_id 		= $this->_get_this('tree_id');
 		$entry_id 		= $this->_get_this('entry_id');
 		$include_current = $this->get_param('include_current', 'no');
@@ -1044,6 +1056,7 @@ class Taxonomy extends Taxonomy_base {
 		$var_prefix = $this->get_param('var_prefix', 'this_');
 
 		// set the tree id
+		$tree = $this->_get_this('tree');
 		$tree_id = $this->_get_this('tree_id');
 
 		if($tree_id && $set)
@@ -1112,6 +1125,8 @@ class Taxonomy extends Taxonomy_base {
 		{
 			$node = $this->cache['trees'][$tree_id]['nodes']['by_node_id'][$node_id];
 			$vars = array(
+				$var_prefix.'tree_label' => $this->cache['trees'][$tree_id]['label'],
+    			$var_prefix.'tree_name' => $this->cache['trees'][$tree_id]['name'],
 				$var_prefix.'tree_id' => $tree_id,
 				$var_prefix.'node_id' => (isset($node['node_id'])) ? $node['node_id'] : '',
 				$var_prefix.'parent_node_id' => (isset($node['parent'])) ? $node['parent'] : '',
@@ -1273,8 +1288,6 @@ class Taxonomy extends Taxonomy_base {
     			$active = '';
     			$active_parent = '';
 
-    			
-
     			// flag the active class
     			if($params['entry_id'] != '' && $params['entry_id'] != "{entry_id}") // there's always some tit.
     			{
@@ -1294,6 +1307,9 @@ class Taxonomy extends Taxonomy_base {
     			}
 
     			$vars = array(
+    				'tree_label' => $this->cache['trees'][$tree_id]['label'],
+    				'tree_name' => $this->cache['trees'][$tree_id]['name'],
+    				'tree_id' => $tree_id,
 					'node_id' => $att['node_id'],
 					'node_title' => $att['label'],
 					'node_url' => $att['url'],
@@ -1324,6 +1340,7 @@ class Taxonomy extends Taxonomy_base {
 					'node_previous_level' => ee()->session->cache['taxonomy_node_previous_level'],
 					'node_previous_level_diff' => ee()->session->cache['taxonomy_node_previous_level'] - $node['level']
 				);
+
 
 				ee()->session->cache['taxonomy_node_previous_level'] = $node['level'];
 				
@@ -1555,6 +1572,21 @@ class Taxonomy extends Taxonomy_base {
 	 */		 
 	private function _get_this($key = 'tree_id')
 	{
+		// set tree_id based on tree name
+		if($key == 'tree')
+		{
+			$name = $this->get_param($key);
+			$trees = ee()->taxonomy->get_trees();
+			foreach($trees as $id => $tree)
+			{
+				if($tree['name'] == $name)
+				{
+					 $this->cache['this_node']['tree_id'] = $id;
+					 break;
+				}
+			}
+		}
+
 		// do we have a globally set tree id (if the param is not set
 		if($this->get_param($key) == '' && isset($this->cache['this_node'][$key]))
 			$id = $this->cache['this_node'][$key];

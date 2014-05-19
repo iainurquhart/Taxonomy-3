@@ -96,19 +96,28 @@ class Taxonomy_model extends Taxonomy_base
 	 */
 	function get_trees()
 	{
-		$trees = ee()->db->get_where('taxonomy_trees', array('site_id' => $this->site_id) )->result_array();
-		// reindex with node ids as keys
-		$data = array();
-		foreach($trees as $tree)
+
+		if(!isset($this->cache['trees']))
 		{
-			$data[ $tree['id'] ] = $tree;
-			$data[ $tree['id'] ]['templates'] = explode('|', $tree['templates']);
-			$data[ $tree['id'] ]['channels'] = explode('|', $tree['channels']);
-			$data[ $tree['id'] ]['member_groups'] = explode('|', $tree['member_groups']);
+
+			$trees = ee()->db->get_where('taxonomy_trees', array('site_id' => $this->site_id) )->result_array();
+			// reindex with node ids as keys
+			$data = array();
+			foreach($trees as $tree)
+			{
+				$data[ $tree['id'] ] = $tree;
+				$data[ $tree['id'] ]['templates'] = explode('|', $tree['templates']);
+				$data[ $tree['id'] ]['channels'] = explode('|', $tree['channels']);
+				$data[ $tree['id'] ]['member_groups'] = explode('|', $tree['member_groups']);
+				$data[ $tree['id'] ]['fields'] = ($tree['fields']) ? json_decode($tree['fields'], TRUE) : array();
+				$data[ $tree['id'] ]['taxonomy'] = ($tree['taxonomy']) ? json_decode($tree['taxonomy'], TRUE) : '';
+			}
+
+			$this->cache['trees'] = $data;
 
 		}
 
-    	return $data;
+    	return $this->cache['trees'];
 	}
 
 
