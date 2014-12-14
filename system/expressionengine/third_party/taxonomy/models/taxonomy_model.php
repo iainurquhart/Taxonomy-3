@@ -100,6 +100,7 @@ class Taxonomy_model extends Taxonomy_base
 		if(!isset($this->cache['trees']))
 		{
 
+			ee()->db->order_by('label', 'asc');
 			$trees = ee()->db->get_where('taxonomy_trees', array('site_id' => $this->site_id) )->result_array();
 			// reindex with node ids as keys
 			$data = array();

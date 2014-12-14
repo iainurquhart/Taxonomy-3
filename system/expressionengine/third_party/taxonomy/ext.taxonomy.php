@@ -165,6 +165,7 @@ class Taxonomy_ext {
 		$t_menu[$this->module_label] = array();
 		
 		// fetch our trees
+		ee()->db->order_by('label', 'asc');
 		$query = ee()->db->get_where('exp_taxonomy_trees',array('site_id' => ee()->config->item('site_id')));
 			
 		if ($query->num_rows() > 0)
