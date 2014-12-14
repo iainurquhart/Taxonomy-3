@@ -28,13 +28,18 @@ class Taxonomy_field_lib {
     {
         if( ! isset(self::$fieldtypes[$ft]))
         {   
+            $file = PATH_THIRD . 'taxonomy/fieldtypes/ft.taxonomy_' . $ft . EXT;
             // load and instantiate the plugin if it doesn't exist already
-            require_once PATH_THIRD . 'taxonomy/fieldtypes/ft.taxonomy_' . $ft . EXT;
-            $ft_class = 'taxonomy_' . $ft . '_ft';
-            self::$fieldtypes[$ft] = new $ft_class;
+            if(file_exists($file))
+            {
+                require_once $file;
+                $ft_class = 'taxonomy_' . $ft . '_ft';
+                self::$fieldtypes[$ft] = new $ft_class;
+            }
+            
         }
         // check that we have an object that extends Taxonomy_field
-        if(self::$fieldtypes[$ft] instanceof Taxonomy_field)
+        if(@self::$fieldtypes[$ft] instanceof Taxonomy_field)
         {
             return self::$fieldtypes[$ft];
         }
