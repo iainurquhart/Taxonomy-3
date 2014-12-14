@@ -105,7 +105,6 @@
 		array('data' => '', 'style' => 'width: 47px;')
 	);
 							
-	$field_options = array('text'  => 'Text Input', 'textarea'  => 'Textarea',  'checkbox'  => 'Checkbox',);	
 
 	
 
@@ -125,7 +124,7 @@
 				array('data' => $drag_handle, 'class' => 'roland_drag_handle'),
 				array('data' => form_input('fields['.$i.'][label]', $label, 'class="taxonomy-field-input"'), 'class' => 'foo'),
 				form_input('fields['.$i.'][name]', $name, 'class="taxonomy-field-input"'),
-				form_dropdown('fields['.$i.'][type]', $field_options, $type),
+				form_dropdown('fields['.$i.'][type]', $fieldtypes, $type),
 				form_checkbox('fields['.$i.'][show_on_publish]', '1', $show_on_publish),
 				array('data' => $nav, 'class' => 'roland_nav')
 			);
@@ -141,7 +140,7 @@
 				array('data' => $drag_handle, 'class' => 'roland_drag_handle'),
 				array('data' => form_input('fields[0][label]', '', 'class="taxonomy-field-input"'), 'class' => 'foo'),
 				form_input('fields[0][name]', '', 'class="taxonomy-field-input"'),
-				form_dropdown('fields[0][type]', $field_options, ''),
+				form_dropdown('fields[0][type]', $fieldtypes, ''),
 				form_checkbox('fields[0][show_on_publish]', '1', ''),
 				array('data' => $nav, 'class' => 'roland_nav')
 			);

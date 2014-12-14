@@ -92,6 +92,9 @@ class Taxonomy_ft extends EE_Fieldtype {
 		ee()->lang->loadfile('taxonomy');
 		ee()->load->library('table');
 		ee()->load->model('taxonomy_model', 'taxonomy');
+		ee()->load->library('taxonomy_field_lib');
+
+		ee()->taxonomy_field_lib->is_fieldtype = true;
 
 		$channel_id = ee()->input->get('channel_id');
 		$entry_id   = ee()->input->get('entry_id');
@@ -140,6 +143,17 @@ class Taxonomy_ft extends EE_Fieldtype {
 		if(isset($data['field_data']) && $data['field_data'] != '')
 		{
 			$vars['data']['field_data'] = (is_array($data['field_data'])) ? $data['field_data'] : json_decode($data['field_data'], TRUE);
+		}
+
+		foreach($vars['tree']['fields'] as $key => $field)
+		{
+			$value = (isset($vars['data']['field_data'][ $field["name"] ]))
+                     ? $vars['data']['field_data'][ $field["name"] ] : '';
+            $ft = ee()->taxonomy_field_lib->load($field['type']);
+
+            $name = $this->settings['field_name'].'[field_data]['.$field["name"].']';
+            // generate the field markup
+            $vars['tree']['fields'][$key]['html'] = $ft->display_field($name, $value);
 		}
 		
 		// build our parent select field

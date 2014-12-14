@@ -131,6 +131,8 @@ class Taxonomy_mcp extends Taxonomy_base {
 		ee()->cp->load_package_js('jquery.roland'); 
 		ee()->javascript->compile();
 
+		$vars['fieldtypes'] = ee()->taxonomy->get_taxonomy_fieldtypes();
+
 		// misc assets/classes required
 		$vars['drag_handle'] = '&nbsp;';
 		$vars['nav'] = '<a class="remove_row" href="#">-</a> <a class="add_row" href="#">+</a>';
@@ -150,6 +152,8 @@ class Taxonomy_mcp extends Taxonomy_base {
 		{
 			$vars['tree'] = $this->tree_settings;
 		}
+
+		// print_r($vars); exit();
 
 		return $this->_content_wrapper('edit_tree', 'tx_edit_tree', $vars);
 
@@ -286,6 +290,7 @@ class Taxonomy_mcp extends Taxonomy_base {
 	{
 		$vars = array();
 		ee()->taxonomy->set_table( ee()->input->get('tree_id') );
+		ee()->load->library('taxonomy_field_lib');
 
 		$vars['tree'] = ee()->taxonomy->get_tree();
 		$vars['node_id'] = ee()->input->get('node_id');
@@ -356,6 +361,18 @@ class Taxonomy_mcp extends Taxonomy_base {
 			$vars['tree']['fields'] = json_decode($vars['tree']['fields'], TRUE);
 		}
 
+		foreach($vars['tree']['fields'] as $key => $field)
+		{
+			$value = (isset($vars['this_node']['field_data'][ $field["name"] ]))
+                     ? $vars['this_node']['field_data'][ $field["name"] ] : '';
+            $ft = ee()->taxonomy_field_lib->load($field['type']);
+            // generate the field markup
+            $name = 'node[field_data]['.$field["name"].']';
+            $vars['tree']['fields'][$key]['html'] = $ft->display_field($name, $value);
+		}
+
+
+
 		return $this->_content_wrapper('manage_node', $lang_key, $vars);
 	}
 
@@ -377,14 +394,22 @@ class Taxonomy_mcp extends Taxonomy_base {
 		}
 
 		ee()->taxonomy->set_table( $node['tree_id'] );
+		ee()->load->library('taxonomy_field_lib');
 
 		$tree = ee()->taxonomy->get_tree();
 
 		// @todo validate tree
 
-		if( isset($node['field_data']) && is_array($node['field_data']))
+		if( isset($tree['fields']) && is_array($tree['fields']))
 		{
-			$node['field_data'] = json_encode($node['field_data']);
+			// $node['field_data'] = json_encode($node['field_data']);
+			foreach($tree['fields'] as $field)
+    		{
+    			$ft = ee()->taxonomy_field_lib->load($field['type']);
+    			$node['field_data'][$field['name']] = @$ft->pre_save($node['field_data'][$field['name']]);
+    		}
+
+    		$node['field_data'] = json_encode($node['field_data']);
 		}
 
 		// do we have a parent? get parent info

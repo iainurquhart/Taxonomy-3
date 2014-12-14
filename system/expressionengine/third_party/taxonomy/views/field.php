@@ -56,6 +56,23 @@
 		);
 	}
 
+
+	foreach($tree['fields'] as $key => $field)
+	{
+		if(!empty($field['show_on_publish']))
+		{
+			$this->table->add_row(
+					$field['label'].':',
+					$field['html']
+				);
+		}
+		else
+		{
+			echo "<div style='display: none';>".$field['html']."</div>";
+		}
+	}
+
+	/*
 	foreach($tree['fields'] as $taxonomy_field)
 	{
 		$value = (isset($data['field_data'][ $taxonomy_field['name'] ])) ? $data['field_data'][ $taxonomy_field['name'] ] : '';
@@ -87,9 +104,9 @@
 		{
 			echo form_hidden($settings['field_name'].'[field_data]['.$taxonomy_field['name'].']', $value);
 		}
-
+	
 		
-	}
+	}*/
 
 	echo $this->table->generate();
 

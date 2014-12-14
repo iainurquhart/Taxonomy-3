@@ -175,7 +175,14 @@ class Taxonomy_model extends Taxonomy_base
 			ee()->db->join('channel_titles', 'channel_titles.entry_id = '.$this->tree_table.'.entry_id', 'left');
 			ee()->db->join('statuses', 'statuses.status = channel_titles.status', 'left');
     		$nodes = ee()->db->get()->result_array();
-    		
+
+    		// map field names => type
+			$cf_map = array();
+			foreach( $this->cache['trees'][$this->tree_id]['fields'] as $cf)
+			{
+			    $cf_map[$cf['name']] = $cf['type'];
+			}
+
     		// reindex with node ids as keys
     		$node_data = $entry_data = array();
     		foreach($nodes as $node)
@@ -198,9 +205,20 @@ class Taxonomy_model extends Taxonomy_base
 
     			if($node['field_data'] != '')
     			{
+    				ee()->load->library('taxonomy_field_lib');
     				$node['field_data'] = json_decode($node['field_data'], TRUE);
     				foreach($node['field_data'] as $k => $v)
     				{
+    					// this should apply to front end template parsing only 
+    					$callers = debug_backtrace();
+    					if ( isset($callers[2]['function']) && $callers[2]['function'] == 'process_tags')
+    					{
+    						$ft = ee()->taxonomy_field_lib->load($cf_map[$k]);
+    						// let the fieldtype change the final value
+                			$v = $ft->replace_value($v);
+                			// overwrite value
+                			$node['field_data'][$k] = $v;
+    					}
     					$node[$k] = $v;
     				}
     			}
@@ -1157,6 +1175,32 @@ class Taxonomy_model extends Taxonomy_base
 		}
 
 		return $this->cache['member_groups_with_access'];
+    }
+
+
+    function get_taxonomy_fieldtypes()
+    {
+    	ee()->load->library('taxonomy_field_lib');
+		ee()->load->helper('directory');
+
+		$fieldtypes = directory_map(PATH_THIRD . 'taxonomy/fieldtypes', 1);
+		$result = preg_replace('/^ft\.taxonomy_([a-zA-Z0-9_\-]+)'.EXT.'$/i', '$1', $fieldtypes);
+		$fieldtypes = array_diff($result, $fieldtypes);
+
+		$r = array();
+
+		foreach($fieldtypes as $type)
+		{
+		    // get name
+		    $ft = ee()->taxonomy_field_lib->load($type);
+
+		    if ( NULL !== $ft->display_name)
+		    {
+		    	$r[$type] = $ft->display_name;
+		    }
+		}
+
+		return $r;
     }
 
     // ------------------------------------------------------------------------
