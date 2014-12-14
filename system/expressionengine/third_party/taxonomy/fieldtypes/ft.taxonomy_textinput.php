@@ -1,6 +1,6 @@
 <?php if ( ! defined('BASEPATH')) exit('No direct script access allowed');
  
-class Taxonomy_text_input_ft extends Taxonomy_field {
+class Taxonomy_textinput_ft extends Taxonomy_field {
 
     /**
      * display_name
