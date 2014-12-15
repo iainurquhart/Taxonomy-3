@@ -344,6 +344,7 @@ class Taxonomy_mcp extends Taxonomy_base {
 		}
 
 		ee()->cp->load_package_js('jquery.chosen.min'); 
+		ee()->cp->load_package_js('taxonomy_field'); 
 		ee()->javascript->compile();
 
 		if( ee()->input->get('add_root') == 1 )
@@ -370,8 +371,6 @@ class Taxonomy_mcp extends Taxonomy_base {
             $name = 'node[field_data]['.$field["name"].']';
             $vars['tree']['fields'][$key]['html'] = $ft->display_field($name, $value);
 		}
-
-
 
 		return $this->_content_wrapper('manage_node', $lang_key, $vars);
 	}

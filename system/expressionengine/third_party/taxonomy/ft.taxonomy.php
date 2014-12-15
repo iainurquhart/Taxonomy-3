@@ -88,13 +88,12 @@ class Taxonomy_ft extends EE_Fieldtype {
 	public function display_field($data)
 	{
 
+
 		
 		ee()->lang->loadfile('taxonomy');
 		ee()->load->library('table');
 		ee()->load->model('taxonomy_model', 'taxonomy');
 		ee()->load->library('taxonomy_field_lib');
-
-		ee()->taxonomy_field_lib->is_fieldtype = true;
 
 		$channel_id = ee()->input->get('channel_id');
 		$entry_id   = ee()->input->get('entry_id');
@@ -138,6 +137,8 @@ class Taxonomy_ft extends EE_Fieldtype {
 		$vars['tree']		= ee()->taxonomy->get_tree();
 		$vars['hide_template'] = TRUE;
 
+		ee()->cp->load_package_js('taxonomy_field'); 
+		ee()->javascript->compile();
 		
 		// check for field data
 		if(isset($data['field_data']) && $data['field_data'] != '')
@@ -247,9 +248,11 @@ class Taxonomy_ft extends EE_Fieldtype {
 
 		ee()->load->model('taxonomy_model', 'taxonomy');
 		ee()->taxonomy->set_table( $data['tree_id'] );
+		ee()->load->library('taxonomy_field_lib');
 
 		// get the submitted parent node
 		$parent = ee()->taxonomy->get_node( $data['parent_lft'] );
+		$tree = ee()->taxonomy->get_tree();
 
 		unset($data['parent_lft']); // not needed for insert
 
@@ -281,10 +284,19 @@ class Taxonomy_ft extends EE_Fieldtype {
 			$data['type'][] = 'custom';
 		}
 
-		if(isset($data['field_data']) && is_array($data['field_data']))
+
+		if( isset($tree['fields']) && is_array($tree['fields']))
 		{
-			$data['field_data'] = json_encode($data['field_data']);
+			// $node['field_data'] = json_encode($node['field_data']);
+			foreach($tree['fields'] as $field)
+    		{
+    			$ft = ee()->taxonomy_field_lib->load($field['type']);
+    			$data['field_data'][$field['name']] = @$ft->pre_save($data['field_data'][$field['name']]);
+    		}
+
+    		$data['field_data'] = json_encode($data['field_data']);
 		}
+
 
 		// updating a node?
 		if( isset($data['node_id']) && $data['node_id'] != '' )
