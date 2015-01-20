@@ -204,7 +204,7 @@ class Taxonomy_model extends Taxonomy_base
     				$node['type'] = array();
     			}
 
-    			if($node['field_data'] != '')
+    			if(!empty($node['field_data']))
     			{
     				ee()->load->library('taxonomy_field_lib');
     				$node['field_data'] = json_decode($node['field_data'], TRUE);
