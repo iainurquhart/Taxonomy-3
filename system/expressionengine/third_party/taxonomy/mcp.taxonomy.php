@@ -42,6 +42,7 @@ class Taxonomy_mcp extends Taxonomy_base {
 	{
 		parent::__construct();
 		ee()->load->model('taxonomy_model', 'taxonomy');
+		ee()->load->helper('taxonomy');
 	}
 	
 	// ----------------------------------------------------------------
@@ -66,10 +67,13 @@ class Taxonomy_mcp extends Taxonomy_base {
 
 		foreach( $trees as $key => $tree)
 		{
-			$vars['trees'][$key] = $tree;
-			$vars['trees'][$key]['edit_tree_link'] 	 = anchor( $this->base_url.AMP.'method=edit_tree'.AMP.'tree_id='.$tree['id'], lang('tx_edit_tree_settings') );
-			$vars['trees'][$key]['edit_nodes_link']  = anchor( $this->base_url.AMP.'method=edit_nodes'.AMP.'tree_id='.$tree['id'], $tree['label'] );
-			$vars['trees'][$key]['delete_tree_link'] = anchor( $this->base_url.AMP.'method=delete_tree'.AMP.'tree_id='.$tree['id'], '<img src="'.$this->theme_base_url.'gfx/icon-delete.png" />' );
+			if( has_access_to_tree(ee()->session->userdata('group_id'), $tree['member_groups']) )
+			{
+				$vars['trees'][$key] = $tree;
+				$vars['trees'][$key]['edit_tree_link'] 	 = anchor( $this->base_url.AMP.'method=edit_tree'.AMP.'tree_id='.$tree['id'], lang('tx_edit_tree_settings') );
+				$vars['trees'][$key]['edit_nodes_link']  = anchor( $this->base_url.AMP.'method=edit_nodes'.AMP.'tree_id='.$tree['id'], $tree['label'] );
+				$vars['trees'][$key]['delete_tree_link'] = anchor( $this->base_url.AMP.'method=delete_tree'.AMP.'tree_id='.$tree['id'], '<img src="'.$this->theme_base_url.'gfx/icon-delete.png" />' );
+			}
 		}
 
 		return $this->_content_wrapper('index', 'tx_manage_trees', $vars);	
@@ -98,7 +102,12 @@ class Taxonomy_mcp extends Taxonomy_base {
 			$vars['tree'] = ee()->taxonomy->get_tree();
 
 			// no settings - no tree, bounce the user
-			if( ! $vars['tree'] ) $this->_notify_redirect( 'tx_invalid_tree' );
+			if( ! $vars['tree'] || ! has_access_to_tree(ee()->session->userdata('group_id'), $vars['tree']['member_groups']) )
+			{
+
+				ee()->session->set_flashdata('message_failure', lang('unauthorised'));
+				ee()->functions->redirect($this->base_url);
+			}
 		}
 		else
 		{
@@ -120,6 +129,8 @@ class Taxonomy_mcp extends Taxonomy_base {
 			');
 		}
 
+
+
 		ee()->cp->add_js_script(
 			array(
 				'ui' => array(
@@ -130,6 +141,8 @@ class Taxonomy_mcp extends Taxonomy_base {
 
 		ee()->cp->load_package_js('jquery.roland'); 
 		ee()->javascript->compile();
+
+		$vars['fieldtypes'] = ee()->taxonomy->get_taxonomy_fieldtypes();
 
 		// misc assets/classes required
 		$vars['drag_handle'] = '&nbsp;';
@@ -150,6 +163,8 @@ class Taxonomy_mcp extends Taxonomy_base {
 		{
 			$vars['tree'] = $this->tree_settings;
 		}
+
+		// print_r($vars); exit();
 
 		return $this->_content_wrapper('edit_tree', 'tx_edit_tree', $vars);
 
@@ -213,6 +228,14 @@ class Taxonomy_mcp extends Taxonomy_base {
 	{
 		
 		ee()->taxonomy->set_table( ee()->input->get('tree_id') );
+
+		$tree = ee()->taxonomy->get_tree();
+
+		if( ! $tree || ! has_access_to_tree(ee()->session->userdata('group_id'), $tree['member_groups']) )
+		{
+			ee()->session->set_flashdata('message_failure', lang('unauthorised'));
+			ee()->functions->redirect($this->base_url);
+		}
 		
 		// @todo add confirmation of delete
 		ee()->db->where('id', ee()->taxonomy->tree_id);
@@ -240,9 +263,13 @@ class Taxonomy_mcp extends Taxonomy_base {
 
 		ee()->taxonomy->set_table( ee()->input->get('tree_id') );
 
-		// @todo validate permissions
-
 		$vars['tree'] = ee()->taxonomy->get_tree();
+
+		if( ! $vars['tree'] || ! has_access_to_tree(ee()->session->userdata('group_id'), $vars['tree']['member_groups']) )
+		{
+			ee()->session->set_flashdata('message_failure', lang('unauthorised'));
+			ee()->functions->redirect($this->base_url);
+		}
 
 		// have we got a taxonomy? 
 		// if not bail here and prompt to insert a root node first.
@@ -286,8 +313,16 @@ class Taxonomy_mcp extends Taxonomy_base {
 	{
 		$vars = array();
 		ee()->taxonomy->set_table( ee()->input->get('tree_id') );
+		ee()->load->library('taxonomy_field_lib');
 
 		$vars['tree'] = ee()->taxonomy->get_tree();
+
+		if( ! $vars['tree'] || ! has_access_to_tree(ee()->session->userdata('group_id'), $vars['tree']['member_groups']) )
+		{
+			ee()->session->set_flashdata('message_failure', lang('unauthorised'));
+			ee()->functions->redirect($this->base_url);
+		}
+
 		$vars['node_id'] = ee()->input->get('node_id');
 		$vars['templates'] = array();
 		$vars['channel_entries'] = array();
@@ -339,6 +374,7 @@ class Taxonomy_mcp extends Taxonomy_base {
 		}
 
 		ee()->cp->load_package_js('jquery.chosen.min'); 
+		ee()->cp->load_package_js('taxonomy_field'); 
 		ee()->javascript->compile();
 
 		if( ee()->input->get('add_root') == 1 )
@@ -354,6 +390,16 @@ class Taxonomy_mcp extends Taxonomy_base {
 		if($vars['tree']['fields'] != '' && !is_array($vars['tree']['fields']))
 		{
 			$vars['tree']['fields'] = json_decode($vars['tree']['fields'], TRUE);
+		}
+
+		foreach($vars['tree']['fields'] as $key => $field)
+		{
+			$value = (isset($vars['this_node']['field_data'][ $field["name"] ]))
+                     ? $vars['this_node']['field_data'][ $field["name"] ] : '';
+            $ft = ee()->taxonomy_field_lib->load($field['type']);
+            // generate the field markup
+            $name = 'node[field_data]['.$field["name"].']';
+            $vars['tree']['fields'][$key]['html'] = $ft->display_field($name, $value);
 		}
 
 		return $this->_content_wrapper('manage_node', $lang_key, $vars);
@@ -377,14 +423,27 @@ class Taxonomy_mcp extends Taxonomy_base {
 		}
 
 		ee()->taxonomy->set_table( $node['tree_id'] );
+		ee()->load->library('taxonomy_field_lib');
 
 		$tree = ee()->taxonomy->get_tree();
 
-		// @todo validate tree
-
-		if( isset($node['field_data']) && is_array($node['field_data']))
+		if( ! $tree || ! has_access_to_tree(ee()->session->userdata('group_id'), $tree['member_groups']) )
 		{
-			$node['field_data'] = json_encode($node['field_data']);
+			ee()->session->set_flashdata('message_failure', lang('unauthorised'));
+			ee()->functions->redirect($this->base_url);
+		}
+
+
+		if( !empty($tree['fields']) && is_array($tree['fields']))
+		{
+			// $node['field_data'] = json_encode($node['field_data']);
+			foreach($tree['fields'] as $field)
+    		{
+    			$ft = ee()->taxonomy_field_lib->load($field['type']);
+    			$node['field_data'][$field['name']] = @$ft->pre_save($node['field_data'][$field['name']]);
+    		}
+
+    		$node['field_data'] = json_encode($node['field_data']);
 		}
 
 		// do we have a parent? get parent info
@@ -446,6 +505,13 @@ class Taxonomy_mcp extends Taxonomy_base {
 		$taxonomy_data 		= json_decode(ee()->input->get_post('taxonomy_order'), TRUE);
 		$tree_settings 		= ee()->taxonomy->get_tree(TRUE);
 
+		if( ! $tree_settings || ! has_access_to_tree(ee()->session->userdata('group_id'), $tree_settings['member_groups']) )
+		{
+			ee()->session->set_flashdata('message_failure', lang('unauthorised'));
+			ee()->functions->redirect($this->base_url);
+		}
+
+
 		// Our tree has been edited since this tree order was sent.
 		// bail out of the whole operation.
 		if( $last_updated_token != $tree_settings['last_updated'])
@@ -480,6 +546,14 @@ class Taxonomy_mcp extends Taxonomy_base {
 	{
 		$tree_id = ee()->input->get_post('tree_id');
 		ee()->taxonomy->set_table( $tree_id );
+
+		$tree = ee()->taxonomy->get_tree();
+
+		if( ! $tree || ! has_access_to_tree(ee()->session->userdata('group_id'), $tree['member_groups']) )
+		{
+			ee()->session->set_flashdata('message_failure', lang('unauthorised'));
+			ee()->functions->redirect($this->base_url);
+		}
 
 		$type = (ee()->input->get_post('type')) ? 'delete_branch' : 'delete_node';
 		

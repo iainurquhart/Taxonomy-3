@@ -116,24 +116,7 @@ $(document).ready(function () {
 						<?php foreach($tree['fields'] as $field):?>
 							<li class="node-field-<?=$field['type']?>">
 							<label for="cf-<?=$field['name']?>"><?=$field['label']?></label>
-							<?php
-
-								$value = (isset($this_node['field_data'][ $field['name'] ]))
-												? $this_node['field_data'][ $field['name'] ] : '';
-
-								switch($field['type'])
-								{
-									case 'text':
-										echo form_input('node[field_data]['.$field['name'].']', $value, 'id="cf-'.$field['name'].'"');
-										break;
-									case 'textarea':
-										echo form_textarea('node[field_data]['.$field['name'].']', $value, 'id="cf-'.$field['name'].'"');
-										break;
-									case 'checkbox':
-										echo form_checkbox('node[field_data]['.$field['name'].']', 1, $value, 'id="cf-'.$field['name'].'"');
-										break;
-								}
-							?>
+							<?= $field['html'] ?>
 							</li>
 						<?php endforeach ?>
 

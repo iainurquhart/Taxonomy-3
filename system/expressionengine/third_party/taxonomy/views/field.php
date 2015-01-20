@@ -1,15 +1,3 @@
-<script type='text/javascript'>
-	// set the taxonomy label from the title
-	$(document).ready(function() {
-		$('.taxonomy_fetch_title').click(function(e) 
-		{	
-				e.preventDefault();
-				var titleVal = $('input[name="title"]').val();
-				var fieldTable = $(this).closest('table');
-				fieldTable.find('.taxonomy_label').val(titleVal);								
-		});
-	});
-</script>
 <?php
 	
 	echo form_hidden($settings['field_name'].'[tree_id]', $tree['id']);
@@ -56,39 +44,20 @@
 		);
 	}
 
-	foreach($tree['fields'] as $taxonomy_field)
+
+	foreach($tree['fields'] as $key => $field)
 	{
-		$value = (isset($data['field_data'][ $taxonomy_field['name'] ])) ? $data['field_data'][ $taxonomy_field['name'] ] : '';
-		if((isset($taxonomy_field['show_on_publish']) && $taxonomy_field['show_on_publish'] == 1))
+		if(!empty($field['show_on_publish']))
 		{
-			if($taxonomy_field['type'] == 'text')
-			{
-				$this->table->add_row(
-					$taxonomy_field['label'].':',
-					form_input($settings['field_name'].'[field_data]['.$taxonomy_field['name'].']', $value)
+			$this->table->add_row(
+					$field['label'].':',
+					$field['html']
 				);
-			}
-			elseif($taxonomy_field['type'] == 'textarea')
-			{
-				$this->table->add_row(
-					$taxonomy_field['label'].':',
-					form_textarea($settings['field_name'].'[field_data]['.$taxonomy_field['name'].']', $value)
-				);
-			}
-			elseif($taxonomy_field['type'] == 'checkbox')
-			{
-				$this->table->add_row(
-					$taxonomy_field['label'].':',
-					form_checkbox($settings['field_name'].'[field_data]['.$taxonomy_field['name'].']', 1, $value )
-				);
-			}
 		}
 		else
 		{
-			echo form_hidden($settings['field_name'].'[field_data]['.$taxonomy_field['name'].']', $value);
+			echo "<div style='display: none';>".$field['html']."</div>";
 		}
-
-		
 	}
 
 	echo $this->table->generate();
