@@ -26,6 +26,10 @@ class Taxonomy_file_ft extends Taxonomy_field {
         {
             $value = "{filedir_".$value['_directory']."}".$value['_hidden_file'];
         }
+        elseif(is_array($value) && empty($value['_directory']))
+        {
+            $value = '';
+        }
 
         // I wish you knew how long it took to figure out I needed this div
         $r  = '<div class="publish_file">'; 
