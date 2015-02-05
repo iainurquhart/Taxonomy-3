@@ -164,8 +164,6 @@ class Taxonomy_mcp extends Taxonomy_base {
 			$vars['tree'] = $this->tree_settings;
 		}
 
-		// print_r($vars); exit();
-
 		return $this->_content_wrapper('edit_tree', 'tx_edit_tree', $vars);
 
 	}
@@ -199,7 +197,7 @@ class Taxonomy_mcp extends Taxonomy_base {
 					unset($fields[$key]);
 				}
 			}
-			if(count($data['fields']))
+			if(count($data['fields']) && !empty($data['fields']))
 			{
 				$data['fields'] = json_encode($fields);
 			}
