@@ -197,7 +197,7 @@ class Taxonomy_mcp extends Taxonomy_base {
 					unset($fields[$key]);
 				}
 			}
-			if(count($data['fields']) && !empty($data['fields']))
+			if(count($fields) && !empty($fields))
 			{
 				$data['fields'] = json_encode($fields);
 			}

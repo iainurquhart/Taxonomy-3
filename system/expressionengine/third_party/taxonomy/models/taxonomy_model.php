@@ -212,13 +212,16 @@ class Taxonomy_model extends Taxonomy_base
     				{
     					// this should apply to front end template parsing only 
     					$callers = debug_backtrace();
-    					if ( isset($callers[2]['function']) && $callers[2]['function'] == 'process_tags')
+    					if ( isset($callers[2]['function']) && $callers[2]['function'] == 'process_tags' && isset($cf_map[$k]))
     					{
+    						
     						$ft = ee()->taxonomy_field_lib->load($cf_map[$k]);
     						// let the fieldtype change the final value
                 			$v = $ft->replace_value($v);
                 			// overwrite value
                 			$node['field_data'][$k] = $v;
+    						
+    						
     					}
     					$node[$k] = $v;
     				}
