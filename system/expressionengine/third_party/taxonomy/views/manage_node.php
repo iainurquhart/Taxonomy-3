@@ -54,7 +54,9 @@ $(document).ready(function () {
 						<label for="node-entry">Select Parent:</label>
 						<select id="node-entry" name="node[parent_lft]">
 							<?php foreach( $nodes as $node) : ?>
-							<option value="<?=$node['lft']?>"><?php echo str_repeat('-&nbsp;', $node['level']).$node['label']?></option>
+								<?php $disabled = ($tree['max_depth'] && $node['level'] >= $tree['max_depth']) ? ' disabled="disabled"' : '';
+								?>
+								<option value="<?=$node['lft']?>"<?=$disabled;?>><?php echo str_repeat('-&nbsp;', $node['level']).$node['label']?></option>
 							<?php endforeach ?>
 						</select>
 					</div>

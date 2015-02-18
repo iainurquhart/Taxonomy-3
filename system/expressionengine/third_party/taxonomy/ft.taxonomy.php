@@ -158,16 +158,11 @@ class Taxonomy_ft extends EE_Fieldtype {
 		}
 		
 		// build our parent select field
-		$nodes = ee()->taxonomy->get_flat_tree();
+		$vars['nodes'] = ee()->taxonomy->get_flat_tree();
 
-		if(!$nodes)
+		if(!$vars['nodes'])
 		{
 			return lang('tx_tree_requires_a_root');
-		}
-
-		foreach($nodes as $node)
-		{
-			$vars['nodes'][ $node['lft'] ] = str_repeat('-&nbsp;', $node['level']).$node['label'];
 		}
 
 		// do we want the template picker?
@@ -285,15 +280,13 @@ class Taxonomy_ft extends EE_Fieldtype {
 		}
 
 
-		if( isset($tree['fields']) && is_array($tree['fields']))
+		if( !empty($tree['fields']) && is_array($tree['fields']))
 		{
-			// $node['field_data'] = json_encode($node['field_data']);
 			foreach($tree['fields'] as $field)
     		{
     			$ft = ee()->taxonomy_field_lib->load($field['type']);
     			$data['field_data'][$field['name']] = @$ft->pre_save($data['field_data'][$field['name']]);
     		}
-
     		$data['field_data'] = json_encode($data['field_data']);
 		}
 

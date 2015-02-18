@@ -16,16 +16,32 @@
 		form_input($settings['field_name'].'[label]', $data['label'], 'class="taxonomy_label" style="width: 60%;"')
 	);
 
-	// prevent the current node from being selected as a parent
-	$parent_select = form_dropdown($settings['field_name'].'[parent_lft]', $nodes, $data['parent_lft']);
-	$parent_select = str_replace('value="'.$data['lft'].'"', 'value="'.$data['lft'].'" disabled="disabled"', $parent_select);
-
 	if($data['lft'] == 1)
 	{
 		echo form_hidden($settings['field_name'].'[parent_lft]', $data['parent_lft']);
 	}
 	else
 	{
+
+		$parent_select = '<select name="'.$settings['field_name'].'[parent_lft]">';
+		foreach($nodes as $node)
+		{
+			$attributes = '';
+			$prefix = ($node['level'] >= 2) ? str_repeat('-&nbsp;', $node['level']) : '';
+			// don't allow nesting level beyond tree settings,
+			// & don't allow node to select itself as parent.
+			if(($tree['max_depth'] && $node['level'] >= $tree['max_depth']) || ($data['lft'] == $node['lft']))
+			{
+				$attributes .= ' disabled="disabled"';
+			}
+			if($data['parent_lft'] == $node['lft'])
+			{
+				$attributes .= ' selected="selected"';
+			}
+			$parent_select .= '<option value="'.$node['lft'].'"'.$attributes.'>'.$prefix.$node['label'].'</option>';
+		}
+		$parent_select .= '</select>';
+
 		$this->table->add_row(
 			lang('tx_select_parent'),
 			$parent_select
