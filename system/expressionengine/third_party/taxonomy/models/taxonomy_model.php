@@ -671,6 +671,16 @@ class Taxonomy_model extends Taxonomy_base
 			"title"
 		);
 
+		// -------------------------------
+		// 'taxonomy_get_entries' extension hook
+		//  called when:
+		//		manage_node
+		// -------------------------------
+		if (ee()->extensions->active_hook('taxonomy_get_entries'))
+		{
+			return ee()->extensions->call('taxonomy_get_entries', $channels, $fields);
+		}
+
 		return ee()->channel_entries_model->get_entries( $channels, $fields )->result_array();
 	 }
 
